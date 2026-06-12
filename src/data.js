@@ -89,9 +89,27 @@ const DEFAULT_STATE = {
 export function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return Object.assign({}, DEFAULT_STATE, JSON.parse(raw));
+    if (raw) {
+      const s = Object.assign({}, DEFAULT_STATE, JSON.parse(raw));
+      flagLegacyDemoSessions(s);
+      return s;
+    }
   } catch (e) { /* ignore */ }
   return Object.assign({}, DEFAULT_STATE);
+}
+
+// Eski versiyada saqlangan demo sessiyalarda `demo` belgisi yo'q edi;
+// genDemo deterministik (seed 42) bo'lgani uchun ularni qayta hosil qilib taniymiz.
+function flagLegacyDemoSessions(s) {
+  if (!s.sessions || !s.sessions.length || s.sessions.some((x) => x.demo)) return;
+  const key = (x) => [x.mode, x.n, x.total, x.correct, x.mood, x.hour, x.daily, x.sec].join("|");
+  const counts = {};
+  genDemo().sessions.forEach((x) => { const k = key(x); counts[k] = (counts[k] || 0) + 1; });
+  s.sessions = s.sessions.map((x) => {
+    const k = key(x);
+    if (counts[k]) { counts[k]--; return Object.assign({}, x, { demo: true }); }
+    return x;
+  });
 }
 export function saveState(s) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ }
@@ -171,7 +189,7 @@ export function genDemo() {
         if (ok) correct++;
         attempts.push({ mode, n, correct: ok, changed: rng() < 0.18 && !ok, hour, date, mood });
       }
-      sessions.push({ mode, n, total, correct, mood, date, hour, daily: si === 0, sec: 120 + Math.floor(rng() * 480) });
+      sessions.push({ mode, n, total, correct, mood, date, hour, daily: si === 0, sec: 120 + Math.floor(rng() * 480), demo: true });
       if (rng() < 0.5) journal.push({ date, mood, tags: [JOURNAL_TAGS[Math.floor(rng() * JOURNAL_TAGS.length)]], note: "" });
     }
   }

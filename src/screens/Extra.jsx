@@ -23,7 +23,9 @@ function moodInfo(id) {
 }
 
 export function LeaderboardScreen({ state, stats }) {
+  // faqat haqiqiy o'ynalgan sessiyalar — demo natijalar shaxsiy rekord emas
   const ranked = (state.sessions || [])
+    .filter((s) => !s.demo)
     .map((s) => ({ ...s, acc: s.total ? Math.round((s.correct / s.total) * 100) : 0 }))
     .sort((a, b) => b.acc - a.acc || b.total - a.total || (a.date < b.date ? 1 : -1))
     .slice(0, 10);
