@@ -4,6 +4,7 @@ import * as D from "./data.js";
 import { Ic, ImgIcon, BottomNav } from "./ui.jsx";
 import { CosmosBG } from "./cosmos-bg.jsx";
 import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
+import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud } from "./telegram.js";
 import { WelcomeScreen, NicknameScreen } from "./screens/Onboarding.jsx";
 import { HomeScreen, ModeSelectScreen } from "./screens/Home.jsx";
 import { GameScreen } from "./screens/Game.jsx";
@@ -30,6 +31,28 @@ export default function App() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setCloudUser(session ? session.user : null));
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Telegram CloudStorage: ochilishda foydalanuvchining bulutdagi holati bilan birlashtiramiz
+  React.useEffect(() => {
+    if (!tgCloudAvailable) return;
+    loadTgCloud()
+      .then((remote) => {
+        if (!remote) return;
+        const merged = D.mergeStates(stateRef.current, remote);
+        setState(merged);
+        D.saveState(merged);
+        if (merged.onboarded) setScreen((sc) => (sc === "welcome" || sc === "nickname" ? "home" : sc));
+        return saveTgCloud(merged);
+      })
+      .catch(() => {});
+  }, []);
+
+  const tgTimer = React.useRef(null);
+  const scheduleTgPush = (next) => {
+    if (!tgCloudAvailable) return;
+    clearTimeout(tgTimer.current);
+    tgTimer.current = setTimeout(() => { saveTgCloud(next).catch(() => {}); }, 1200);
+  };
 
   // kirilgach: bulutdagi holat bilan birlashtirib, natijani qaytarib yuboramiz
   React.useEffect(() => {
@@ -79,7 +102,7 @@ export default function App() {
     },
   };
 
-  const save = (next) => { setState(next); D.saveState(next); schedulePush(next); };
+  const save = (next) => { setState(next); D.saveState(next); schedulePush(next); scheduleTgPush(next); };
 
   const attempts = state.attempts;
   const stats = React.useMemo(() => D.computeStats(attempts, "week"), [attempts]);
@@ -133,7 +156,12 @@ export default function App() {
       <div className="app" style={appStyle}>
         <CosmosBG />
 
-        {screen === "welcome" ? <WelcomeScreen onStart={() => setScreen("nickname")} /> : null}
+        {/* Telegramda ism botdan olinadi — nickname so'ralmaydi */}
+        {screen === "welcome" ? <WelcomeScreen onStart={() => {
+          const name = tgName();
+          if (name) finishOnboarding(name);
+          else setScreen("nickname");
+        }} /> : null}
         {screen === "nickname" ? <NicknameScreen onDone={finishOnboarding} /> : null}
 
         {screen === "home" ? (

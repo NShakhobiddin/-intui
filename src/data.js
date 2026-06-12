@@ -158,7 +158,13 @@ function migrateLegacyV1() {
 export function mergeStates(local, cloud) {
   if (!cloud) return local;
   const has = (s) => ((s.sessions || []).length || (s.attempts || []).length) > 0;
-  if (!has(cloud)) return local;
+  if (!has(cloud)) {
+    // bulutda o'yin ma'lumoti bo'lmasa ham nickname/onboarding ko'chsin
+    return Object.assign({}, local, {
+      nickname: local.nickname || cloud.nickname || null,
+      onboarded: local.onboarded || !!cloud.onboarded,
+    });
+  }
   if (!has(local)) {
     return Object.assign({}, DEFAULT_STATE, cloud, {
       nickname: cloud.nickname || local.nickname || null,

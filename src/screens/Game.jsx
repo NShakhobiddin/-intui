@@ -2,6 +2,7 @@
 import React from "react";
 import * as D from "../data.js";
 import { Ic, Logo, Ring, GlowButton, ImgIcon, BackBtn, ModeIcon, ShapeGlyph, MoodIcon } from "../ui.jsx";
+import { inTelegram, showBackButton, hideBackButton, haptic } from "../telegram.js";
 
 function buildOptions(mode, n) {
   if (mode.id === "bw") {
@@ -93,6 +94,7 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
     setPickTimer(null);
     setPick(i);
     const correct = i !== null && i === secret;
+    haptic(correct ? "success" : "error");
     setResults((r) => [...r, { correct, changed, missed: i === null }]);
     setPhase("reveal");
   }
@@ -118,6 +120,15 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
     if (results.length && phase !== "summary") setPhase("summary");
     else onExit();
   }
+
+  // Telegramning o'z "orqaga" tugmasi ham xuddi shunday ishlaydi
+  const exitRef = React.useRef(handleExit);
+  exitRef.current = handleExit;
+  React.useEffect(() => {
+    if (!inTelegram) return;
+    showBackButton(() => exitRef.current());
+    return hideBackButton;
+  }, []);
 
   const correctN = results.filter((r) => r.correct).length;
   const acc = results.length ? Math.round((correctN / results.length) * 100) : 0;

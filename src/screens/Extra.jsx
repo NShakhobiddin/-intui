@@ -2,6 +2,7 @@
 import React from "react";
 import * as D from "../data.js";
 import { Ic, Logo, Ring, ImgIcon, SectionHead, ModeIcon, MoodIcon, GlowButton } from "../ui.jsx";
+import { tgCloudAvailable } from "../telegram.js";
 
 const UZB_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"];
 function fmtDay(dstr) {
@@ -144,6 +145,22 @@ function CloudSection({ cloud }) {
   const [mode, setMode] = React.useState("in"); // in: kirish | up: ro'yxatdan o'tish
   const [busy, setBusy] = React.useState(false);
   const [msg, setMsg] = React.useState(null); // {ok, text}
+
+  // Telegram ichida sinxronlash avtomatik — login forma kerak emas
+  if (tgCloudAvailable) {
+    return (
+      <React.Fragment>
+        <SectionHead title="Bulutda saqlash" />
+        <div className="panel" style={{ padding: 18, display: "flex", alignItems: "center", gap: 13 }}>
+          <Ic name="check" size={20} color="var(--good)" style={{ flex: "none" }} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 15 }}>Telegram orqali saqlanadi</div>
+            <div className="t-micro" style={{ marginTop: 3, lineHeight: 1.5 }}>Natijalaringiz Telegram hisobingizga bog'langan — botni boshqa qurilmada ochsangiz ham tiklanadi.</div>
+          </div>
+        </div>
+      </React.Fragment>
+    );
+  }
 
   if (!cloud || !cloud.enabled) return null;
 
@@ -319,7 +336,7 @@ export function ProfileScreen({ state, stats, cloud, onRename, onReset }) {
             Progressni tozalash
           </button>
           <p className="t-micro" style={{ textAlign: "center", marginTop: 12 }}>
-            Intui v1.0 · {cloud && cloud.user ? "Ma'lumotlar qurilmangizda va bulutda saqlanadi" : "Ma'lumotlar faqat qurilmangizda saqlanadi"}
+            Intui v1.0 · {tgCloudAvailable ? "Ma'lumotlar Telegram hisobingizda saqlanadi" : cloud && cloud.user ? "Ma'lumotlar qurilmangizda va bulutda saqlanadi" : "Ma'lumotlar faqat qurilmangizda saqlanadi"}
           </p>
         </div>
       </div>

@@ -25,6 +25,23 @@ npm run build    # dist/ ga production build
 npm run preview  # buildni lokal ko'rish
 ```
 
+## Telegram Mini App
+
+Ilova Telegram bot orqali ochilishga moslangan:
+
+- Foydalanuvchi ismi Telegramdan avtomatik olinadi (nickname so'ralmaydi)
+- Natijalar **Telegram CloudStorage**'da saqlanadi — foydalanuvchi botni istalgan qurilmada ochsa, progress o'zi tiklanadi (hech qanday ro'yxatdan o'tish kerak emas)
+- O'yin paytida Telegramning o'z "Orqaga" tugmasi ishlaydi, to'g'ri/noto'g'ri javobda haptic vibratsiya beriladi
+- Ekran Telegram viewport'iga moslanadi, pastga surib yopish o'chirilgan
+
+Botga ulash (BotFather orqali):
+
+1. Telegramda [@BotFather](https://t.me/BotFather) ga `/newbot` yozib bot yarating.
+2. `/newapp` buyrug'i bilan botga Mini App qo'shing — Web App URL sifatida `https://nshakhobiddin.github.io/-intui/` ni kiriting (rasm/gif so'ralganda ixtiyoriy yuklang). Bot `t.me/<bot>/<app>` havola oladi.
+3. Qo'shimcha: `/mybots → bot → Bot Settings → Menu Button → Edit Menu Button URL` ga ham shu URLni qo'ysangiz, chatdagi pastki tugma ilovani ochadi.
+
+Oddiy brauzerda ochilganda ilova avvalgidek ishlayveradi (localStorage + ixtiyoriy Supabase).
+
 ## Bulut sinxronlashni yoqish (Supabase)
 
 Backend ixtiyoriy — kalitlar berilmasa ilova faqat lokal rejimda ishlaydi.

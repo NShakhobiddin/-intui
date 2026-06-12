@@ -40,6 +40,8 @@ body {
 /* Phone-width stage centered on desktop, full-bleed on mobile */
 .stage {
   height: 100dvh;
+  /* Telegram Mini App ichida Telegram bergan barqaror balandlik ishlatiladi */
+  height: var(--tg-viewport-stable-height, 100dvh);
   display: flex;
   justify-content: center;
   background:
