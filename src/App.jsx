@@ -9,25 +9,8 @@ import { GameScreen } from "./screens/Game.jsx";
 import { StatsScreen } from "./screens/Stats.jsx";
 import { LeaderboardScreen, ProfileScreen } from "./screens/Extra.jsx";
 
-function seedDemoState() {
-  const demo = D.genDemo();
-  const s = Object.assign({}, D.loadState(), demo);
-  s.xp = 2450;
-  s.streak = 12;
-  s.bestStreak = 17;
-  s.lastActiveDate = D.todayStr();
-  D.checkBadges(s);
-  return s;
-}
-
 export default function App() {
-  const [state, setState] = React.useState(() => {
-    const s = D.loadState();
-    if (!s.onboarded && !s.attempts.length) {
-      return Object.assign(seedDemoState(), { onboarded: false });
-    }
-    return s;
-  });
+  const [state, setState] = React.useState(() => D.loadState());
   const [screen, setScreen] = React.useState(state.onboarded ? "home" : "welcome");
   const [game, setGame] = React.useState(null); // {mode, n}
   const [newBadges, setNewBadges] = React.useState([]);

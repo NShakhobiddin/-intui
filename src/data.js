@@ -70,7 +70,8 @@ export const MOODS = [
 export const JOURNAL_TAGS = ["Diqqatim jamlangan edi", "Ichki ovozni his qildim", "Shunchaki taxmin qildim", "Tanam tinch edi", "Fikrlarim chalg'idi", "Tezroq tugatgim keldi"];
 
 // ---------- Storage ----------
-export const STORAGE_KEY = "intui_state_v1";
+export const STORAGE_KEY = "intui_state_v2";
+const LEGACY_KEY = "intui_state_v1"; // demo ma'lumotli eski format
 const DEFAULT_STATE = {
   nickname: null,
   onboarded: false,
@@ -89,27 +90,80 @@ const DEFAULT_STATE = {
 export function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const s = Object.assign({}, DEFAULT_STATE, JSON.parse(raw));
-      flagLegacyDemoSessions(s);
-      return s;
-    }
+    if (raw) return Object.assign({}, DEFAULT_STATE, JSON.parse(raw));
+    const migrated = migrateLegacyV1();
+    if (migrated) return migrated;
   } catch (e) { /* ignore */ }
   return Object.assign({}, DEFAULT_STATE);
 }
 
-// Eski versiyada saqlangan demo sessiyalarda `demo` belgisi yo'q edi;
-// genDemo deterministik (seed 42) bo'lgani uchun ularni qayta hosil qilib taniymiz.
-function flagLegacyDemoSessions(s) {
-  if (!s.sessions || !s.sessions.length || s.sessions.some((x) => x.demo)) return;
-  const key = (x) => [x.mode, x.n, x.total, x.correct, x.mood, x.hour, x.daily, x.sec].join("|");
-  const counts = {};
-  genDemo().sessions.forEach((x) => { const k = key(x); counts[k] = (counts[k] || 0) + 1; });
-  s.sessions = s.sessions.map((x) => {
-    const k = key(x);
-    if (counts[k]) { counts[k]--; return Object.assign({}, x, { demo: true }); }
-    return x;
+/* ---------- v1 -> v2 migratsiyasi ----------
+   v1 da birinchi ochilishda demo ma'lumotlar yozilardi. Demo generatori
+   deterministik (seed 42) bo'lgani uchun uni qayta hosil qilib, saqlangan
+   ma'lumotlardan demo sessiya/jurnal yozuvlarini aniq ajratamiz; faqat
+   haqiqiy o'ynalgan sessiyalar ko'chiriladi. */
+function migrateLegacyV1() {
+  let old;
+  try {
+    const raw = localStorage.getItem(LEGACY_KEY);
+    if (!raw) return null;
+    old = JSON.parse(raw);
+  } catch (e) { return null; }
+
+  const demo = legacyGenDemo();
+  const skey = (x) => [x.mode, x.n, x.total, x.correct, x.mood, x.hour, x.daily, x.sec].join("|");
+  const scounts = {};
+  demo.sessions.forEach((x) => { const k = skey(x); scounts[k] = (scounts[k] || 0) + 1; });
+  const sessions = (old.sessions || []).filter((x) => {
+    if (x.demo) return false;
+    const k = skey(x);
+    if (scounts[k]) { scounts[k]--; return false; }
+    return true;
+  }).map((x) => { const { demo: _d, ...rest } = x; return rest; });
+
+  // demo urinishlarni yakka-yakka ishonchli ajratib bo'lmaydi —
+  // urinishlar haqiqiy sessiyalardan qayta tiklanadi
+  const attempts = [];
+  sessions.forEach((s) => {
+    for (let i = 0; i < (s.total || 0); i++) {
+      attempts.push({ mode: s.mode, n: s.n, correct: i < s.correct, changed: false, hour: s.hour, date: s.date, mood: s.mood });
+    }
   });
+
+  const jkey = (j) => [j.mood, (j.tags || []).join(","), j.note || ""].join("|");
+  const jcounts = {};
+  demo.journal.forEach((j) => { const k = jkey(j); jcounts[k] = (jcounts[k] || 0) + 1; });
+  const journal = (old.journal || []).filter((j) => {
+    const k = jkey(j);
+    if (jcounts[k]) { jcounts[k]--; return false; }
+    return true;
+  });
+
+  const s = Object.assign({}, DEFAULT_STATE, {
+    nickname: old.nickname || null,
+    onboarded: !!old.onboarded,
+    attempts, sessions, journal,
+  });
+  recomputeStreak(s);
+  checkBadges(s);
+  saveState(s);
+  try { localStorage.removeItem(LEGACY_KEY); } catch (e) { /* ignore */ }
+  return s;
+}
+
+function recomputeStreak(s) {
+  const dates = Array.from(new Set(s.sessions.map((x) => x.date))).sort();
+  let cur = 0, best = 0, prev = null;
+  dates.forEach((d) => {
+    cur = prev && new Date(d) - new Date(prev) === 864e5 ? cur + 1 : 1;
+    best = Math.max(best, cur);
+    prev = d;
+  });
+  const today = todayStr();
+  const yest = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  s.lastActiveDate = dates.length ? dates[dates.length - 1] : null;
+  s.streak = s.lastActiveDate === today || s.lastActiveDate === yest ? cur : 0;
+  s.bestStreak = best;
 }
 export function saveState(s) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ }
@@ -160,8 +214,9 @@ export function minutesOn(sessions, date) {
   return Math.round(sec / 60);
 }
 
-// ---------- Demo ma'lumotlar (statistika ko'rinishi uchun) ----------
-export function genDemo() {
+// v1 dagi demo generatorining aynan nusxasi — faqat migratsiyada demo
+// yozuvlarni tanib olish uchun ishlatiladi (rng chaqiruvlar tartibi muhim)
+function legacyGenDemo() {
   const rng = mulberry32(42);
   const attempts = [];
   const sessions = [];
@@ -189,7 +244,7 @@ export function genDemo() {
         if (ok) correct++;
         attempts.push({ mode, n, correct: ok, changed: rng() < 0.18 && !ok, hour, date, mood });
       }
-      sessions.push({ mode, n, total, correct, mood, date, hour, daily: si === 0, sec: 120 + Math.floor(rng() * 480), demo: true });
+      sessions.push({ mode, n, total, correct, mood, date, hour, daily: si === 0, sec: 120 + Math.floor(rng() * 480) });
       if (rng() < 0.5) journal.push({ date, mood, tags: [JOURNAL_TAGS[Math.floor(rng() * JOURNAL_TAGS.length)]], note: "" });
     }
   }

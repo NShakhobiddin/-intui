@@ -14,7 +14,7 @@ Claude Design (claude.ai/design) prototipi asosida React + Vite'da qurilgan mobi
 - **Eng yaxshi natijalar** — shaxsiy rekordlar: qaysi kun, qaysi vaqt, qanday holatda
 - **Profil** — streak, kunlik mashq daqiqalari, yutuqlar (badge), sezgi jurnali, progressni tozalash
 
-Progress `localStorage`da saqlanadi; birinchi ochilishda statistika ko'rinishi uchun demo ma'lumotlar yuklanadi.
+Barcha ma'lumotlar faqat foydalanuvchining o'z natijalari — ilova bo'sh holatda boshlanadi va har bir sessiya qurilmaning `localStorage` xotirasida avtomatik saqlanadi (server yo'q; boshqa qurilmada sinxronlash uchun backend kerak bo'ladi).
 
 ## Ishga tushirish
 
