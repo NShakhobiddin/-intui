@@ -151,6 +151,57 @@ function migrateLegacyV1() {
   return s;
 }
 
+/* ---------- Bulut bilan birlashtirish ----------
+   Sessiya/jurnal yozuvlari birlashtiriladi (bir xil yozuvdan bittasi
+   qoladi), ikkala tomonda ham yangilik bo'lsa urinishlar sessiyalardan
+   qayta tiklanadi; streak va yutuqlar qayta hisoblanadi. */
+export function mergeStates(local, cloud) {
+  if (!cloud) return local;
+  const has = (s) => ((s.sessions || []).length || (s.attempts || []).length) > 0;
+  if (!has(cloud)) return local;
+  if (!has(local)) {
+    return Object.assign({}, DEFAULT_STATE, cloud, {
+      nickname: cloud.nickname || local.nickname || null,
+      onboarded: true,
+    });
+  }
+  // jsonb kalitlar tartibini o'zgartiradi — kanonik kalit bilan solishtiramiz
+  const ckey = (x) => JSON.stringify(Object.keys(x).sort().map((k) => [k, x[k]]));
+  const dedupe = (a, b) => {
+    const seen = new Set(a.map(ckey));
+    return a.concat(b.filter((x) => {
+      const k = ckey(x);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    }));
+  };
+  const sessions = dedupe(local.sessions || [], cloud.sessions || []);
+  const journal = dedupe(local.journal || [], cloud.journal || []);
+  let attempts;
+  if (sessions.length === (local.sessions || []).length) {
+    attempts = local.attempts || [];
+  } else if (sessions.length === (cloud.sessions || []).length) {
+    attempts = cloud.attempts || [];
+  } else {
+    attempts = [];
+    sessions.forEach((s) => {
+      for (let i = 0; i < (s.total || 0); i++) {
+        attempts.push({ mode: s.mode, n: s.n, correct: i < s.correct, changed: false, hour: s.hour, date: s.date, mood: s.mood });
+      }
+    });
+  }
+  const s = Object.assign({}, DEFAULT_STATE, {
+    nickname: local.nickname || cloud.nickname || null,
+    onboarded: true,
+    attempts, sessions, journal,
+    xp: Math.max(local.xp || 0, cloud.xp || 0),
+  });
+  recomputeStreak(s);
+  checkBadges(s);
+  return s;
+}
+
 function recomputeStreak(s) {
   const dates = Array.from(new Set(s.sessions.map((x) => x.date))).sort();
   let cur = 0, best = 0, prev = null;

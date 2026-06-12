@@ -3,6 +3,7 @@ import React from "react";
 import * as D from "./data.js";
 import { Ic, ImgIcon, BottomNav } from "./ui.jsx";
 import { CosmosBG } from "./cosmos-bg.jsx";
+import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
 import { WelcomeScreen, NicknameScreen } from "./screens/Onboarding.jsx";
 import { HomeScreen, ModeSelectScreen } from "./screens/Home.jsx";
 import { GameScreen } from "./screens/Game.jsx";
@@ -15,7 +16,70 @@ export default function App() {
   const [game, setGame] = React.useState(null); // {mode, n}
   const [newBadges, setNewBadges] = React.useState([]);
 
-  const save = (next) => { setState(next); D.saveState(next); };
+  // ---------- bulut sinxronlash ----------
+  const [cloudUser, setCloudUser] = React.useState(null);
+  const [cloudStatus, setCloudStatus] = React.useState("");
+  const stateRef = React.useRef(state);
+  stateRef.current = state;
+  const pushTimer = React.useRef(null);
+  const syncedFor = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!cloudEnabled) return;
+    supabase.auth.getSession().then(({ data }) => setCloudUser(data.session ? data.session.user : null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setCloudUser(session ? session.user : null));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  // kirilgach: bulutdagi holat bilan birlashtirib, natijani qaytarib yuboramiz
+  React.useEffect(() => {
+    if (!cloudUser || syncedFor.current === cloudUser.id) return;
+    syncedFor.current = cloudUser.id;
+    setCloudStatus("syncing");
+    fetchCloudState(cloudUser.id)
+      .then((remote) => {
+        const merged = D.mergeStates(stateRef.current, remote);
+        setState(merged);
+        D.saveState(merged);
+        return pushCloudState(cloudUser.id, merged);
+      })
+      .then(() => setCloudStatus("synced"))
+      .catch(() => setCloudStatus("error"));
+  }, [cloudUser]);
+
+  const schedulePush = (next) => {
+    if (!cloudEnabled || !cloudUser) return;
+    const uid = cloudUser.id;
+    clearTimeout(pushTimer.current);
+    setCloudStatus("syncing");
+    pushTimer.current = setTimeout(() => {
+      pushCloudState(uid, next)
+        .then(() => setCloudStatus("synced"))
+        .catch(() => setCloudStatus("error"));
+    }, 800);
+  };
+
+  const cloud = {
+    enabled: cloudEnabled,
+    user: cloudUser,
+    status: cloudStatus,
+    signIn: async (email, password) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(authErrorText(error));
+    },
+    signUp: async (email, password) => {
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.href } });
+      if (error) throw new Error(authErrorText(error));
+      return data.user && !data.session ? "confirm" : "ok";
+    },
+    signOut: async () => {
+      await supabase.auth.signOut();
+      syncedFor.current = null;
+      setCloudStatus("");
+    },
+  };
+
+  const save = (next) => { setState(next); D.saveState(next); schedulePush(next); };
 
   const attempts = state.attempts;
   const stats = React.useMemo(() => D.computeStats(attempts, "week"), [attempts]);
@@ -86,7 +150,7 @@ export default function App() {
         {screen === "stats" ? <StatsScreen state={stateView} demoMerged={attempts} /> : null}
         {screen === "leaderboard" ? <LeaderboardScreen state={stateView} stats={stats} /> : null}
         {screen === "profile" ? (
-          <ProfileScreen state={stateView} stats={stats}
+          <ProfileScreen state={stateView} stats={stats} cloud={cloud}
             onRename={(n) => save(Object.assign({}, state, { nickname: n }))}
             onReset={resetAll} />
         ) : null}

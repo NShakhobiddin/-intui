@@ -14,7 +14,7 @@ Claude Design (claude.ai/design) prototipi asosida React + Vite'da qurilgan mobi
 - **Eng yaxshi natijalar** — shaxsiy rekordlar: qaysi kun, qaysi vaqt, qanday holatda
 - **Profil** — streak, kunlik mashq daqiqalari, yutuqlar (badge), sezgi jurnali, progressni tozalash
 
-Barcha ma'lumotlar faqat foydalanuvchining o'z natijalari — ilova bo'sh holatda boshlanadi va har bir sessiya qurilmaning `localStorage` xotirasida avtomatik saqlanadi (server yo'q; boshqa qurilmada sinxronlash uchun backend kerak bo'ladi).
+Barcha ma'lumotlar faqat foydalanuvchining o'z natijalari — ilova bo'sh holatda boshlanadi va har bir sessiya qurilmaning `localStorage` xotirasida avtomatik saqlanadi. Supabase sozlangan bo'lsa (quyiga qarang), Profilda email+parol bilan hisob ochib natijalarni bulutda saqlash va boshqa qurilmada davom ettirish mumkin.
 
 ## Ishga tushirish
 
@@ -24,3 +24,18 @@ npm run dev      # http://localhost:5173
 npm run build    # dist/ ga production build
 npm run preview  # buildni lokal ko'rish
 ```
+
+## Bulut sinxronlashni yoqish (Supabase)
+
+Backend ixtiyoriy — kalitlar berilmasa ilova faqat lokal rejimda ishlaydi.
+
+1. [supabase.com](https://supabase.com) da bepul hisob va yangi project oching.
+2. Dashboard'da **SQL Editor** bo'limiga `supabase/schema.sql` faylini joylashtirib **Run** bosing.
+3. **Authentication → Sign In / Up → Email** bo'limida **Confirm email** ni o'chiring (aks holda har bir foydalanuvchi emailini tasdiqlashi kerak bo'ladi — xohlasangiz yoqiq qoldiring, ilova buni ham qo'llaydi).
+4. **Project Settings → API** dan **Project URL** va **anon/public key** ni oling.
+5. GitHub repoda **Settings → Secrets and variables → Actions** ga ikkita secret qo'shing:
+   - `VITE_SUPABASE_URL` — Project URL
+   - `VITE_SUPABASE_ANON_KEY` — anon key
+6. **Actions → Deploy to GitHub Pages → Run workflow** bilan deployni qayta ishga tushiring.
+
+Shundan so'ng Profil sahifasida "Bulutda saqlash" bo'limi paydo bo'ladi. Lokal ishlatish uchun loyiha ildizida `.env.local` faylga shu ikki o'zgaruvchini yozish kifoya.

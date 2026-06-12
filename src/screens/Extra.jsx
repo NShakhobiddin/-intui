@@ -1,7 +1,7 @@
 /* ===== Intui — Eng yaxshi natijalar + Profil ===== */
 import React from "react";
 import * as D from "../data.js";
-import { Ic, Logo, Ring, ImgIcon, SectionHead, ModeIcon, MoodIcon } from "../ui.jsx";
+import { Ic, Logo, Ring, ImgIcon, SectionHead, ModeIcon, MoodIcon, GlowButton } from "../ui.jsx";
 
 const UZB_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"];
 function fmtDay(dstr) {
@@ -137,8 +137,79 @@ function hashStr(s) {
   return Math.abs(h);
 }
 
+/* ===== Bulutda saqlash (Supabase sozlangan bo'lsa) ===== */
+function CloudSection({ cloud }) {
+  const [email, setEmail] = React.useState("");
+  const [pass, setPass] = React.useState("");
+  const [mode, setMode] = React.useState("in"); // in: kirish | up: ro'yxatdan o'tish
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState(null); // {ok, text}
+
+  if (!cloud || !cloud.enabled) return null;
+
+  const submit = async () => {
+    if (busy) return;
+    if (!/\S+@\S+\.\S+/.test(email.trim())) { setMsg({ text: "Email noto'g'ri ko'rinadi" }); return; }
+    if (pass.length < 6) { setMsg({ text: "Parol kamida 6 belgidan iborat bo'lsin" }); return; }
+    setBusy(true);
+    setMsg(null);
+    try {
+      if (mode === "in") {
+        await cloud.signIn(email.trim(), pass);
+      } else {
+        const r = await cloud.signUp(email.trim(), pass);
+        if (r === "confirm") setMsg({ ok: true, text: "Emailingizga tasdiqlash xati yubordik. Tasdiqlagach \"Kirish\" orqali kiring." });
+      }
+    } catch (e) {
+      setMsg({ text: e.message });
+    }
+    setBusy(false);
+  };
+
+  const statusText = { syncing: "Sinxronlanmoqda…", synced: "Sinxronlandi", error: "Sinxronlashda xatolik — internetni tekshiring" }[cloud.status] || "";
+
+  return (
+    <React.Fragment>
+      <SectionHead title="Bulutda saqlash" />
+      <div className="panel" style={{ padding: 18 }}>
+        {cloud.user ? (
+          <React.Fragment>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Ic name="check" size={18} color="var(--good)" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, overflow: "hidden", textOverflow: "ellipsis" }}>{cloud.user.email}</div>
+                <div className="t-micro" style={{ marginTop: 2, color: cloud.status === "error" ? "var(--bad)" : undefined }}>{statusText || "Natijalaringiz bulutda saqlanadi"}</div>
+              </div>
+            </div>
+            <button className="btn-ghost" style={{ marginTop: 14, minHeight: 46 }} onClick={cloud.signOut}>Chiqish</button>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <p className="t-sub" style={{ fontSize: 14 }}>Hisob ochsangiz, natijalaringiz bulutda saqlanadi va boshqa qurilmada ham ko'rinadi.</p>
+            <div className="seg" style={{ marginTop: 12 }}>
+              <button className={mode === "in" ? "on" : ""} onClick={() => { setMode("in"); setMsg(null); }}>Kirish</button>
+              <button className={mode === "up" ? "on" : ""} onClick={() => { setMode("up"); setMsg(null); }}>Ro'yxatdan o'tish</button>
+            </div>
+            <input className="field" type="email" placeholder="Email" value={email} autoComplete="email"
+              onChange={(e) => setEmail(e.target.value)} style={{ marginTop: 12, minHeight: 50, fontSize: 15.5 }} />
+            <input className="field" type="password" placeholder="Parol (kamida 6 belgi)" value={pass}
+              autoComplete={mode === "in" ? "current-password" : "new-password"}
+              onChange={(e) => setPass(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+              style={{ marginTop: 10, minHeight: 50, fontSize: 15.5 }} />
+            {msg ? <p className="t-micro" style={{ marginTop: 10, color: msg.ok ? "var(--good)" : "var(--bad)", fontSize: 13, lineHeight: 1.5 }}>{msg.text}</p> : null}
+            <GlowButton icon={null} chevron={false} disabled={busy} onClick={submit} style={{ marginTop: 14, minHeight: 50, fontSize: 16 }}>
+              {busy ? "Kuting…" : mode === "in" ? "Kirish" : "Ro'yxatdan o'tish"}
+            </GlowButton>
+          </React.Fragment>
+        )}
+      </div>
+    </React.Fragment>
+  );
+}
+
 /* ===== Profil ===== */
-export function ProfileScreen({ state, stats, onRename, onReset }) {
+export function ProfileScreen({ state, stats, cloud, onRename, onReset }) {
   const todayMin = D.minutesOn(state.sessions, D.todayStr());
   const [editing, setEditing] = React.useState(false);
   const [nick, setNick] = React.useState(state.nickname || "");
@@ -238,13 +309,18 @@ export function ProfileScreen({ state, stats, onRename, onReset }) {
           </div>
         )}
 
+        {/* Bulut sinxronlash */}
+        <CloudSection cloud={cloud} />
+
         {/* Danger zone */}
         <div style={{ marginTop: 26 }}>
           <button className="btn-ghost" style={{ color: "var(--bad)", borderColor: "rgba(251,113,133,0.25)" }} onClick={onReset}>
             <Ic name="close" size={18} color="var(--bad)" />
             Progressni tozalash
           </button>
-          <p className="t-micro" style={{ textAlign: "center", marginTop: 12 }}>Intui v1.0 · Ma'lumotlar faqat qurilmangizda saqlanadi</p>
+          <p className="t-micro" style={{ textAlign: "center", marginTop: 12 }}>
+            Intui v1.0 · {cloud && cloud.user ? "Ma'lumotlar qurilmangizda va bulutda saqlanadi" : "Ma'lumotlar faqat qurilmangizda saqlanadi"}
+          </p>
         </div>
       </div>
     </div>
