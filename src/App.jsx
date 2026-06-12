@@ -71,7 +71,7 @@ export default function App() {
   const resetAll = () => {
     if (!window.confirm("Barcha progress o'chiriladi. Davom etasizmi?")) return;
     try { localStorage.removeItem(D.STORAGE_KEY); } catch (e) {}
-    const fresh = Object.assign({}, seedDemoState(), { onboarded: true, nickname: state.nickname });
+    const fresh = Object.assign({}, D.loadState(), { onboarded: true, nickname: state.nickname });
     save(fresh);
     setScreen("home");
   };

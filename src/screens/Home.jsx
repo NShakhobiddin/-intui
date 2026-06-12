@@ -5,7 +5,7 @@ import { Ic, Logo, Ring, GlowButton, ImgIcon, SectionHead, ModeIcon, DiffPill } 
 
 export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode }) {
   const todayMin = D.minutesOn(state.sessions, D.todayStr());
-  const daily = Math.min(10, state.dailyProgress);
+  const daily = Math.min(100, state.dailyProgress);
   const tip = tips[0];
   return (
     <div className="screen" data-screen-label="Bosh sahifa">
