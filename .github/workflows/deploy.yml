@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -28,6 +28,20 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      # Build natijasini branch ildiziga ham commit qilamiz — shunda Pages
+      # "Deploy from a branch" (legacy) rejimida qolsa ham sayt tayyor
+      # ilovani ko'rsatadi. GITHUB_TOKEN push'i workflow'ni qayta ishga
+      # tushirmaydi, shuning uchun loop bo'lmaydi.
+      - name: Publish built app to branch root
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -r -q --ignore-unmatch assets workbox-*.js
+          cp -r dist/. .
+          git add -A
+          git commit -m "chore: publish built app to branch root [skip ci]" || echo "no changes"
+          git push origin HEAD:${{ github.ref_name }}
       # Pages "Deploy from a branch" rejimida qolib ketsa, xom manba fayllari
       # serve qilinadi (bo'sh sahifa). Majburan workflow rejimiga o'tkazamiz.
       - name: Switch Pages source to GitHub Actions

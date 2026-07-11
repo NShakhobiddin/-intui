@@ -2,8 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-// base "./" — ilova istalgan sub-yo'lda (masalan GitHub Pages) ishlaydi
+// Manba web/ ichida; base "./" — ilova istalgan sub-yo'lda ishlaydi.
+// Build natijasi CI tomonidan branch ildiziga ham commit qilinadi, shunda
+// GitHub Pages "branchdan deploy" rejimida ham tayyor ilova ochiladi.
 export default defineConfig({
+  root: "web",
+  build: { outDir: "../dist", emptyOutDir: true },
   plugins: [
     react(),
     // Service worker: barcha fayllar keshlanadi — ikkinchi ochilish oniy,

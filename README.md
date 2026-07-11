@@ -16,6 +16,11 @@ Claude Design (claude.ai/design) prototipi asosida React + Vite'da qurilgan mobi
 
 Barcha ma'lumotlar faqat foydalanuvchining o'z natijalari — ilova bo'sh holatda boshlanadi va har bir sessiya qurilmaning `localStorage` xotirasida avtomatik saqlanadi. Supabase sozlangan bo'lsa (quyiga qarang), Profilda email+parol bilan hisob ochib natijalarni bulutda saqlash va boshqa qurilmada davom ettirish mumkin.
 
+## Tuzilma
+
+- `web/` — ilova manbasi (index.html, src, public)
+- Repo ildizidagi `index.html`, `assets/`, `sw.js` va boshqalar — **CI avtomatik commit qiladigan build natijasi** (qo'lda tahrirlamang). Bu GitHub Pages "Deploy from a branch" rejimida ham tayyor ilova ochilishi uchun kerak; Pages "GitHub Actions" rejimida esa artifact orqali deploy bo'ladi — ikkala rejimda ham sayt ishlaydi.
+
 ## Ishga tushirish
 
 ```bash
