@@ -16,6 +16,18 @@ const ver = (v) => {
   try { return inTelegram && tg.isVersionAtLeast(v); } catch (e) { return false; }
 };
 
+// Fullscreen rejimida Telegramning o'z tugmalari (yopish, menyu) va status
+// bar kontent ustiga tushadi — ular egallagan joyni CSS o'zgaruvchiga yozamiz.
+function applyInsets() {
+  try {
+    const sa = tg.safeAreaInset || {};
+    const ca = tg.contentSafeAreaInset || {};
+    const root = document.documentElement.style;
+    root.setProperty("--safe-top", ((sa.top || 0) + (ca.top || 0)) + "px");
+    root.setProperty("--safe-bottom", (sa.bottom || 0) + "px");
+  } catch (e) { /* ignore */ }
+}
+
 export function initTelegram() {
   if (!inTelegram) return;
   try {
@@ -25,6 +37,15 @@ export function initTelegram() {
     if (tg.setBackgroundColor) tg.setBackgroundColor("#06050e");
     // scroll paytida ilova pastga tortilib yopilib ketmasin
     if (ver("7.7") && tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    // fullscreen'da ekran aylanib ketmasin (portret o'yin)
+    if (ver("8.0") && tg.lockOrientation) tg.lockOrientation();
+    applyInsets();
+    if (tg.onEvent) {
+      tg.onEvent("safeAreaChanged", applyInsets);
+      tg.onEvent("contentSafeAreaChanged", applyInsets);
+      tg.onEvent("fullscreenChanged", applyInsets);
+      tg.onEvent("viewportChanged", applyInsets);
+    }
   } catch (e) { /* ignore */ }
 }
 

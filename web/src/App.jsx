@@ -206,7 +206,7 @@ function BadgeToast({ ids, onClose }) {
   if (!badges.length) return null;
   return (
     <div className="pop" onClick={onClose} style={{
-      position: "absolute", left: 16, right: 16, top: 16, zIndex: 80, cursor: "pointer",
+      position: "absolute", left: 16, right: 16, top: "calc(16px + var(--inset-top))", zIndex: 80, cursor: "pointer",
       background: "linear-gradient(180deg, #1d1840, #120e2a)", border: "1px solid var(--stroke)",
       borderRadius: 20, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13,
       boxShadow: "0 10px 40px rgba(0,0,0,0.5), 0 0 30px hsla(var(--accent-h),88%,70%,0.25)",

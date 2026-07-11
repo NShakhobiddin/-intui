@@ -69,7 +69,7 @@ function HowSheet({ onClose }) {
     }}>
       <div onClick={(e) => e.stopPropagation()} style={{
         background: "linear-gradient(180deg, #161330, #0c0a1e)", borderRadius: "28px 28px 0 0",
-        border: "1px solid var(--stroke)", borderBottom: "none", padding: "14px 22px 34px",
+        border: "1px solid var(--stroke)", borderBottom: "none", padding: "14px 22px calc(34px + var(--inset-bottom))",
       }}>
         <div style={{ width: 44, height: 5, borderRadius: 99, background: "rgba(255,255,255,0.15)", margin: "0 auto 18px" }}></div>
         <h2 style={{ fontSize: 24, marginBottom: 18 }}>Qanday ishlaydi?</h2>

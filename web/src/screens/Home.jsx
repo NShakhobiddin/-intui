@@ -150,7 +150,12 @@ export function ModeSelectScreen({ onStart, initial }) {
           })}
         </div>
 
-        <div style={{ position: "sticky", bottom: 96, marginTop: 20, zIndex: 10 }}>
+        {/* Footer sifatida: orqasida qoraytirish bor, kontent ustiga "yalang'och" tushmaydi */}
+        <div style={{
+          position: "sticky", bottom: "calc(84px + var(--inset-bottom))", zIndex: 10, marginTop: 22,
+          padding: "16px 0 8px",
+          background: "linear-gradient(180deg, rgba(6,5,14,0) 0%, rgba(6,5,14,0.85) 35%, rgba(6,5,14,0.95) 100%)",
+        }}>
           <GlowButton burst={true} onClick={() => onStart(mode, counts[mode.id])}>Davom etish</GlowButton>
         </div>
       </div>
