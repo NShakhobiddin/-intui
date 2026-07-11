@@ -33,7 +33,14 @@ body {
   font-family: "Manrope", system-ui, sans-serif;
   color: var(--text);
   overflow: hidden;
+  /* webview'da ilovadek his: matn tanlash va scroll-bounce o'chirilgan */
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
+
+input, textarea { -webkit-user-select: text; user-select: text; }
 
 #root { height: 100%; }
 
@@ -74,6 +81,8 @@ body {
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   animation: screen-in calc(0.5s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1);
 }

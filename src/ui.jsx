@@ -102,7 +102,7 @@ export function Ic({ name, size = 22, color = "currentColor", style }) {
 export function Logo({ size = 64, glow = true }) {
   return (
     <img
-      src={asset("assets/icons/owl.png")}
+      src={asset("assets/icons/owl.webp")}
       alt=""
       draggable={false}
       style={{ width: size, height: size, display: "block", borderRadius: "50%", objectFit: "cover", filter: glow ? "drop-shadow(0 0 18px rgba(140,120,255,0.55))" : "none", pointerEvents: "none", userSelect: "none" }} />);
@@ -133,7 +133,7 @@ export function ImgIcon({ name, size = 24, round = false, style }) {
   return (
     <img
       className="img-ic"
-      src={asset("assets/icons/" + name + ".png")}
+      src={asset("assets/icons/" + name + ".webp")}
       alt=""
       draggable={false}
       style={Object.assign({ width: size, height: size, borderRadius: round ? "50%" : "24%" }, style)} />);
@@ -252,7 +252,7 @@ export function MoodIcon({ mood, size = 18, color }) {
   if (!mood) return null;
   if (mood.icon === "lotus") {
     const c = color || mood.color;
-    const m = `url('${asset("assets/icons/mood-lotus.png")}')`;
+    const m = `url('${asset("assets/icons/mood-lotus.webp")}')`;
     const s = size * 0.82; // lotus belgisi biroz kichikroq turadi
     return <span aria-hidden="true" style={{ width: s, height: s, display: "inline-block", flex: "none", background: c, WebkitMaskImage: m, maskImage: m, WebkitMaskSize: "contain", maskSize: "contain", WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat", WebkitMaskPosition: "center", maskPosition: "center", fontSize: "12px" }}></span>;
   }

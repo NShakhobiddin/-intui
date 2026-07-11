@@ -4,13 +4,25 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Intui — Ichki sezgingizni uyg'oting</title>
+<meta name="theme-color" content="#0c0a1c" />
+<style>
+  /* JS yuklanguncha oq sahifa ko'rinmasin */
+  html, body { height: 100%; margin: 0; background: #06050e; }
+  @keyframes intui-spin { to { transform: rotate(360deg); } }
+</style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
-<div id="root"></div>
+<div id="root">
+  <!-- yuklanish ekrani — React ishga tushishi bilan almashadi -->
+  <div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(140% 52% at 50% -6%, rgba(112,86,224,0.22), transparent 62%),#06050e;color:#f2f0ff;font-family:system-ui,sans-serif">
+    <div style="width:44px;height:44px;border-radius:50%;border:3px solid rgba(167,155,255,0.22);border-top-color:#a78bfa;animation:intui-spin 0.9s linear infinite"></div>
+    <div style="font-size:24px;font-weight:600;letter-spacing:0.04em">Intui</div>
+  </div>
+</div>
 <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

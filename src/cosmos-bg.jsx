@@ -67,7 +67,7 @@ function CosmosBase() {
   const scale = 1.07 + 0.045 * Math.sin(CTAU * (t / CLOOP));
   const driftY = 10 * Math.sin(CTAU * (t / CLOOP) + Math.PI / 3);
   return (
-    <img src={asset("assets/cosmos.png")} alt="" style={{
+    <img src={asset("assets/cosmos.webp")} alt="" style={{
       position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
       transform: `scale(${scale}) translateY(${driftY}px)`, transformOrigin: "50% 42%", willChange: "transform",
     }} />
