@@ -37,6 +37,12 @@ export function initTelegram() {
     if (tg.setBackgroundColor) tg.setBackgroundColor("#06050e");
     // scroll paytida ilova pastga tortilib yopilib ketmasin
     if (ver("7.7") && tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    // Telegramda to'liq ekran (fullscreen) rejimida ochilsin — Bot API 8.0.
+    // Mobil qurilmalarda ishlaydi; desktopda "fullscreenFailed" bo'ladi,
+    // u holda expand() bergan to'liq balandlik saqlanadi.
+    if (ver("8.0") && tg.requestFullscreen && !tg.isFullscreen) {
+      tg.requestFullscreen();
+    }
     // fullscreen'da ekran aylanib ketmasin (portret o'yin)
     if (ver("8.0") && tg.lockOrientation) tg.lockOrientation();
     applyInsets();
