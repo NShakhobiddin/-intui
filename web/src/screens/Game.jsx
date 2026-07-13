@@ -302,7 +302,7 @@ function GameShell({ mode, attempt, total, onExit, onFinish, children }) {
 
 /* Ochilgan karta va tanlov tugmalari uchun yorqin, tekis ranglar (gradientsiz) */
 const SOLID = { oq: "#ffffff", qora: "#000000", qizil: "#ff3b52", kok: "#2f7bff", yashil: "#18c26a", sariq: "#ffc21e" };
-const faceColor = (card) => SOLID[card.id] || card.color;
+export const faceColor = (card) => SOLID[card.id] || card.color;
 
 /* ---------- Oq-qora: ochilganda butun karta oppoq yoki qopqora ---------- */
 function RevealFace({ mode, card }) {
@@ -518,7 +518,7 @@ function CardBackBg() {
   );
 }
 
-function CardBack() {
+export function CardBack() {
   return (
     <div className="gcard-inner card-back-cosmos">
       {/* abstrakt fon */}

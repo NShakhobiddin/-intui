@@ -60,6 +60,32 @@ export function haptic(type) {
   try { tg.HapticFeedback.notificationOccurred(type); } catch (e) { /* ignore */ }
 }
 
+// Deep-link start parametri: t.me/bot/app?startapp=<code> orqali qo'shilish
+export function tgStartParam() {
+  try { return (inTelegram && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || ""; }
+  catch (e) { return ""; }
+}
+
+// Taklif havolasini ulashish. Telegramda tabiiy "ulashish" oynasi ochiladi;
+// aks holda navigator.share yoki clipboard. Natija: "shared" | "copied" | "".
+export async function shareInvite(url, text) {
+  try {
+    if (inTelegram && tg.openTelegramLink) {
+      tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text || ""));
+      return "shared";
+    }
+    if (typeof navigator !== "undefined" && navigator.share) {
+      await navigator.share({ text: (text ? text + " " : "") + url });
+      return "shared";
+    }
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+      return "copied";
+    }
+  } catch (e) { /* ignore */ }
+  return "";
+}
+
 let backCb = null;
 export function showBackButton(cb) {
   if (!inTelegram || !tg.BackButton) return;

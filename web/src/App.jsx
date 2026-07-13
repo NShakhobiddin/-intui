@@ -4,18 +4,23 @@ import * as D from "./data.js";
 import { Ic, ImgIcon, BottomNav } from "./ui.jsx";
 import { CosmosBG } from "./cosmos-bg.jsx";
 import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
-import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud } from "./telegram.js";
+import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud, tgStartParam } from "./telegram.js";
+import { normalizeCode } from "./duo.js";
 import { WelcomeScreen, NicknameScreen } from "./screens/Onboarding.jsx";
 import { HomeScreen, ModeSelectScreen } from "./screens/Home.jsx";
 import { GameScreen } from "./screens/Game.jsx";
 import { StatsScreen } from "./screens/Stats.jsx";
 import { LeaderboardScreen, ProfileScreen } from "./screens/Extra.jsx";
+import { DuoScreen } from "./screens/Duo.jsx";
 
 export default function App() {
   const [state, setState] = React.useState(() => D.loadState());
   const [screen, setScreen] = React.useState(state.onboarded ? "home" : "welcome");
   const [game, setGame] = React.useState(null); // {mode, n}
   const [newBadges, setNewBadges] = React.useState([]);
+  const [duoCode, setDuoCode] = React.useState(null); // do'stga qo'shilish kodi (null = xona yaratish)
+  const wantDuo = React.useRef(null); // deep-link orqali kutilayotgan kod
+  const myName = state.nickname || tgName() || "Do'st";
 
   // ---------- bulut sinxronlash ----------
   const [cloudUser, setCloudUser] = React.useState(null);
@@ -46,6 +51,23 @@ export default function App() {
       })
       .catch(() => {});
   }, []);
+
+  // Deep-link (Telegram startapp yoki ?room=) orqali do'stga qo'shilish
+  React.useEffect(() => {
+    let p = tgStartParam();
+    if (!p && typeof location !== "undefined") {
+      try { p = new URLSearchParams(location.search).get("room") || ""; } catch (e) { /* ignore */ }
+    }
+    const code = normalizeCode(p);
+    if (code && code.length >= 4) wantDuo.current = code;
+  }, []);
+  React.useEffect(() => {
+    if (wantDuo.current && state.onboarded && screen !== "duo") {
+      setDuoCode(wantDuo.current);
+      wantDuo.current = null;
+      setScreen("duo");
+    }
+  }, [state.onboarded, screen]);
 
   const tgTimer = React.useRef(null);
   const scheduleTgPush = (next) => {
@@ -147,7 +169,7 @@ export default function App() {
   };
 
   // ---------- render ----------
-  const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname";
+  const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo";
   // 247 — prototip standart aksenti #8b7cf6 ning hue qiymati
   const appStyle = { "--accent-h": 247, "--speed": 1 };
 
@@ -168,7 +190,13 @@ export default function App() {
           <HomeScreen state={stateView} stats={stats} tips={tips}
             onNav={setScreen}
             onStartDaily={() => setScreen("practice")}
-            onPickMode={(m) => startGame(m)} />
+            onPickMode={(m) => startGame(m)}
+            onDuo={() => { setDuoCode(null); setScreen("duo"); }} />
+        ) : null}
+
+        {screen === "duo" ? (
+          <DuoScreen myName={myName} initialCode={duoCode}
+            onExit={() => { setDuoCode(null); setScreen("home"); }} />
         ) : null}
 
         {screen === "practice" ? (

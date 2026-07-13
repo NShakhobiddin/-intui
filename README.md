@@ -47,6 +47,16 @@ Botga ulash (BotFather orqali):
 
 Oddiy brauzerda ochilganda ilova avvalgidek ishlayveradi (localStorage + ixtiyoriy Supabase).
 
+## Do'st bilan o'ynash (onlayn sezgi dueli)
+
+Bosh sahifadagi "Do'st bilan o'ynash" — ikki kishilik onlayn rejim:
+
+- Bir tomon kartani yashirin tanlaydi ("Hissiyotingizni yuboring"), ikkinchi tomon sezib topadi ("Do'stingizni his eting"). Har raundda rollar almashadi.
+- Rejimlar: Oq-qora, Rangli, Shaklli. Ikkala o'yinchida qaysi karta yashirilgani/tanlangani reveal paytida ko'rinadi (guesser oldindan ko'rmaydi).
+- Do'stni **taklif havolasi** yoki 5 belgili **kod** orqali chaqirish mumkin; ikkala o'yinchining ismi ko'rinadi.
+- Realtime aloqa **Supabase Realtime** kanali orqali — shuning uchun bu funksiya Supabase sozlanganda ishlaydi (quyiga qarang). Supabase yo'q bo'lsa, ekranda tushuntirish chiqadi.
+- Ixtiyoriy: `VITE_TG_LINK` env o'zgaruvchisiga bot Mini App havolasini bersangiz (masalan `https://t.me/YourBot/app`), taklif havolasi Telegram deep-link (`?startapp=<kod>`) bo'lib, do'st bosishi bilan xonaga avtomatik qo'shiladi. Berilmasa, veb-URL (`?room=<kod>`) ishlatiladi.
+
 ## Bulut sinxronlashni yoqish (Supabase)
 
 Backend ixtiyoriy — kalitlar berilmasa ilova faqat lokal rejimda ishlaydi.
