@@ -54,8 +54,13 @@ Bosh sahifadagi "Do'st bilan o'ynash" — ikki kishilik onlayn rejim:
 - Bir tomon kartani yashirin tanlaydi ("Hissiyotingizni yuboring"), ikkinchi tomon sezib topadi ("Do'stingizni his eting"). Har raundda rollar almashadi.
 - Rejimlar: Oq-qora, Rangli, Shaklli. Ikkala o'yinchida qaysi karta yashirilgani/tanlangani reveal paytida ko'rinadi (guesser oldindan ko'rmaydi).
 - Do'stni **taklif havolasi** yoki 5 belgili **kod** orqali chaqirish mumkin; ikkala o'yinchining ismi ko'rinadi.
-- Realtime aloqa **Supabase Realtime** kanali orqali — shuning uchun bu funksiya Supabase sozlanganda ishlaydi (quyiga qarang). Supabase yo'q bo'lsa, ekranda tushuntirish chiqadi.
-- Ixtiyoriy: `VITE_TG_LINK` env o'zgaruvchisiga bot Mini App havolasini bersangiz (masalan `https://t.me/YourBot/app`), taklif havolasi Telegram deep-link (`?startapp=<kod>`) bo'lib, do'st bosishi bilan xonaga avtomatik qo'shiladi. Berilmasa, veb-URL (`?room=<kod>`) ishlatiladi.
+
+Ikki rejim bor va ilova avtomatik moslashadi:
+
+1. **Jonli (Supabase bilan)** — ikki o'yinchi bir vaqtda, real vaqtda o'ynaydi (Supabase Realtime kanali). Supabase sozlangan bo'lsa ishlaydi.
+2. **Telegram orqali navbatli (backendsiz)** — hech qanday server kerak emas: siz kartani yashirasiz → ilova "chaqiruv" havolasini yasaydi → uni Telegramda do'stingizga yuborasiz → do'st ochib sezib topadi → natija havolasini qaytaradi. Yashirin karta havola ichida yengil shifrlanadi (jiddiy himoya emas — do'stona o'yin uchun). Supabase yo'q bo'lsa yoki lobbydagi "Yoki Telegram orqali navbat bilan" tanlansa shu rejim ishlaydi.
+
+- Ixtiyoriy: `VITE_TG_LINK` env o'zgaruvchisiga bot Mini App havolasini bersangiz (masalan `https://t.me/YourBot/app`), taklif/chaqiruv havolasi Telegram deep-link (`?startapp=…`) bo'lib, do'st bosishi bilan to'g'ridan-to'g'ri ilovada ochiladi. Berilmasa, veb-URL (`?g=…`) ishlatiladi.
 
 ## Bulut sinxronlashni yoqish (Supabase)
 

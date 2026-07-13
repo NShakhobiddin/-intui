@@ -6,7 +6,7 @@ import React from "react";
 import * as D from "../data.js";
 import { Ic, Logo, BackBtn, ShapeGlyph, GlowButton } from "../ui.jsx";
 import { CardBack, faceColor } from "./Game.jsx";
-import { duoAvailable, joinDuo, makeRoomCode, normalizeCode, inviteUrl } from "../duo.js";
+import { duoAvailable, joinDuo, makeRoomCode, normalizeCode, inviteUrl, encodeToken } from "../duo.js";
 import { shareInvite, haptic } from "../telegram.js";
 
 const DUO_MODES = [
@@ -116,6 +116,7 @@ export function DuoScreen({ myName, initialCode, onExit }) {
   const [score, setScore] = React.useState({ correct: 0, total: 0 });
   const [codeInput, setCodeInput] = React.useState("");
   const [shareMsg, setShareMsg] = React.useState("");
+  const [asyncCompose, setAsyncCompose] = React.useState(false);
 
   const conn = React.useRef(null);
   const scoredRound = React.useRef(-1);
@@ -233,15 +234,20 @@ export function DuoScreen({ myName, initialCode, onExit }) {
   };
   const exit = () => { if (conn.current) { conn.current.leave(); conn.current = null; } onExit(); };
 
-  // ---------- Supabase yo'q bo'lsa ----------
-  if (!duoAvailable) {
+  // ---------- Supabase yo'q yoki async tanlangan: Telegram orqali navbatli ----------
+  if (asyncCompose || (!duoAvailable && !initialCode)) {
+    return <AsyncDuo myName={myName} startMode={mode}
+      onExit={asyncCompose ? () => setAsyncCompose(false) : onExit} />;
+  }
+  // Supabase yo'q, lekin jonli xona kodi bilan kelingan — jonli ulanib bo'lmaydi
+  if (!duoAvailable && initialCode) {
     return (
       <Shell onExit={onExit} title="Do'st bilan o'ynash">
         <div style={{ flex: 1 }}></div>
         <div className="panel" style={{ padding: 24, textAlign: "center" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><Ic name="wave" size={40} color="var(--accent)" /></div>
-          <div style={{ fontWeight: 700, fontSize: 17 }}>Onlayn rejim uchun ulanish kerak</div>
-          <p className="t-sub" style={{ fontSize: 14, marginTop: 8 }}>Do'st bilan o'ynash Supabase server sozlangach ishlaydi (README'ga qarang). Ilovaning qolgan qismi shusiz ham ishlayveradi.</p>
+          <div style={{ fontWeight: 700, fontSize: 17 }}>Jonli xonaga ulanib bo'lmadi</div>
+          <p className="t-sub" style={{ fontSize: 14, marginTop: 8 }}>Jonli rejim uchun Supabase sozlanishi kerak (README). Navbatli rejimda esa do'stingiz sizga karta havolasini yuborishi kerak.</p>
         </div>
         <div style={{ flex: 1 }}></div>
       </Shell>
@@ -278,7 +284,7 @@ export function DuoScreen({ myName, initialCode, onExit }) {
 
         <div style={{ flex: 1 }}></div>
         <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-          <GlowButton icon="user" onClick={createRoom}>Do'st chaqirish</GlowButton>
+          <GlowButton icon="user" onClick={createRoom}>Jonli chaqirish</GlowButton>
           <div style={{ display: "flex", gap: 8 }}>
             <input className="field" placeholder="Do'st kodi" value={codeInput} maxLength={5}
               onChange={(e) => setCodeInput(normalizeCode(e.target.value))}
@@ -286,6 +292,9 @@ export function DuoScreen({ myName, initialCode, onExit }) {
               style={{ textAlign: "center", letterSpacing: "0.25em", fontWeight: 800, textTransform: "uppercase" }} />
             <button className="btn-ghost" style={{ width: 120, flex: "none" }} disabled={normalizeCode(codeInput).length < 4} onClick={joinByCode}>Qo'shilish</button>
           </div>
+          <button onClick={() => setAsyncCompose(true)} style={{ color: "var(--accent)", fontSize: 14, fontWeight: 700, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+            Yoki Telegram orqali navbat bilan <Ic name="chevR" size={15} />
+          </button>
         </div>
       </Shell>
     );
@@ -449,5 +458,158 @@ function Shell({ onExit, title, children }) {
         <div style={{ marginTop: 16, display: "flex", flexDirection: "column", flex: 1 }}>{children}</div>
       </div>
     </div>
+  );
+}
+
+/* ===== Telegram orqali navbatli (async, backendsiz) rejim =====
+   token yo'q → compose (kartani yashirib havola yuborish)
+   token.ty==="c" → guess (do'st yashirganini sezish)
+   token.ty==="r" → result (do'st sezganining natijasi) */
+export function AsyncDuo({ myName, token, startMode, onExit }) {
+  const initView = token ? (token.ty === "r" ? "result" : "guess") : "compose";
+  const [view, setView] = React.useState(initView);
+  const [mode, setMode] = React.useState((token && token.m) || startMode || "bw");
+  const [secret, setSecret] = React.useState(null);
+  const [guess, setGuess] = React.useState(null);
+  const [shareMsg, setShareMsg] = React.useState("");
+  const options = React.useMemo(() => duoOptions(mode), [mode]);
+  const chooserName = token && token.n ? token.n : "Do'stingiz";
+
+  const doShare = async (param, text) => {
+    const r = await shareInvite(inviteUrl(param), text);
+    setShareMsg(r === "copied" ? "Havola nusxalandi — do'stга yuboring" : r === "shared" ? "" : "Havolani qo'lda yuboring");
+  };
+
+  // ---------- Kartani yashirib yuborish ----------
+  const composePick = (i) => {
+    setSecret(i);
+    haptic("warning");
+    const tok = encodeToken({ v: 1, ty: "c", m: mode, s: i, n: (myName || "Do'st").slice(0, 20) });
+    setView("sent");
+    doShare(tok, "Intui — men karta yashirdim, sezib top! 🔮");
+  };
+
+  // ---------- Do'st yashirganini sezish ----------
+  const guessPick = (i) => {
+    setGuess(i);
+    const correct = i === token.s;
+    haptic(correct ? "success" : "warning");
+    setView("reveal");
+  };
+
+  if (view === "compose") {
+    return (
+      <Shell onExit={onExit} title="Kartani yashirish">
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 19, fontWeight: 800, color: "var(--accent)" }}>Hissiyotingizni yuboring</div>
+          <p className="t-sub" style={{ fontSize: 14, marginTop: 6 }}>Yashirin karta tanlang — havola do'stingizga boradi, u sezib topadi.</p>
+        </div>
+        <div className="t-label" style={{ marginTop: 18, marginBottom: 8 }}>Rejim</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 9 }}>
+          {DUO_MODES.map((m) => {
+            const on = mode === m.id;
+            return (
+              <button key={m.id} className="panel row-press" onClick={() => setMode(m.id)} style={{
+                padding: "14px 6px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                border: on ? "1.5px solid var(--accent)" : "1px solid var(--stroke-soft)",
+                background: on ? "var(--card-2)" : "var(--card)",
+              }}>
+                <ModeGlyph id={m.id} />
+                <span style={{ fontSize: 12.5, fontWeight: 700 }}>{m.name}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 20 }}>
+          <DuoCard mode={mode} card={null} open={false} />
+          <DuoChoices mode={mode} options={options} onPick={composePick} disabled={false} />
+        </div>
+      </Shell>
+    );
+  }
+
+  if (view === "sent") {
+    const card = options[secret];
+    const tok = encodeToken({ v: 1, ty: "c", m: mode, s: secret, n: (myName || "Do'st").slice(0, 20) });
+    return (
+      <Shell onExit={onExit} title="Yuborildi">
+        <div style={{ flex: 1 }}></div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <DuoCard mode={mode} card={card} open />
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <div style={{ fontSize: 19, fontWeight: 800 }}>Karta yashirildi</div>
+            <p className="t-sub" style={{ fontSize: 14, marginTop: 6, maxWidth: 300 }}>Havolani do'stingizga yuboring — u sezib topganda javob qaytaradi.</p>
+          </div>
+        </div>
+        <div style={{ flex: 1 }}></div>
+        <GlowButton icon="sparkle" chevron={false} onClick={() => doShare(tok, "Intui — men karta yashirdim, sezib top! 🔮")}>Havolani ulashish</GlowButton>
+        {shareMsg ? <p className="t-micro" style={{ textAlign: "center", marginTop: 10 }}>{shareMsg}</p> : null}
+        <button className="btn-ghost" style={{ marginTop: 10 }} onClick={onExit}>Tayyor</button>
+      </Shell>
+    );
+  }
+
+  if (view === "guess") {
+    return (
+      <Shell onExit={onExit} title="Sezgi dueli">
+        <div style={{ textAlign: "center" }}>
+          <div className="pill" style={{ margin: "0 auto" }}><Ic name="user" size={14} color="var(--accent)" />{chooserName} karta yashirdi</div>
+          <div style={{ fontSize: 19, fontWeight: 800, color: "var(--accent)", marginTop: 14 }}>Do'stingizni his eting</div>
+          <p className="t-sub" style={{ fontSize: 14, marginTop: 6 }}>{chooserName} qaysi kartani tanladi? Ichki sezgingizga quloq soling.</p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 20 }}>
+          <DuoCard mode={mode} card={null} open={false} />
+          <DuoChoices mode={mode} options={options} onPick={guessPick} disabled={false} />
+        </div>
+      </Shell>
+    );
+  }
+
+  if (view === "reveal") {
+    const correct = guess === token.s;
+    const sc = options[token.s];
+    const gc = options[guess];
+    const rtok = encodeToken({ v: 1, ty: "r", m: mode, s: token.s, g: guess, c: correct, n: (myName || "Do'st").slice(0, 20) });
+    return (
+      <Shell onExit={onExit} title="Natija">
+        <div style={{ flex: 1 }}></div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <DuoCard mode={mode} card={sc} open tone={correct ? "win" : "lose"} />
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: correct ? "var(--good)" : "var(--bad)" }}>{correct ? "To'g'ri sezdingiz! 🎯" : "Bu safar sezmadingiz"}</div>
+            <p className="t-sub" style={{ fontSize: 14, marginTop: 6 }}>
+              {chooserName} yashirgan: <b style={{ color: "var(--text)" }}>{sc ? sc.label : ""}</b>{" · "}Siz sezgan: <b style={{ color: correct ? "var(--good)" : "var(--bad)" }}>{gc ? gc.label : ""}</b>
+            </p>
+          </div>
+        </div>
+        <div style={{ flex: 1 }}></div>
+        <GlowButton icon="sparkle" chevron={false} onClick={() => doShare(rtok, correct ? "Sezdim! 🎯 Endi sen top:" : "Bu safar sezmadim. Endi sen top:")}>Natijani do'stга yuborish</GlowButton>
+        {shareMsg ? <p className="t-micro" style={{ textAlign: "center", marginTop: 10 }}>{shareMsg}</p> : null}
+        <button className="btn-ghost" style={{ marginTop: 10 }} onClick={() => { setSecret(null); setGuess(null); setShareMsg(""); setView("compose"); }}>
+          <Ic name="yinyang" size={18} color="var(--accent)" /> Endi men yashiraman
+        </button>
+      </Shell>
+    );
+  }
+
+  // view === "result" — do'st sezganining natijasi
+  const correct = !!token.c;
+  const sc = options[token.s];
+  const gc = options[token.g];
+  return (
+    <Shell onExit={onExit} title="Do'st javobi">
+      <div style={{ flex: 1 }}></div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <DuoCard mode={mode} card={sc} open tone={correct ? "win" : "lose"} />
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: correct ? "var(--good)" : "var(--bad)" }}>{chooserName} {correct ? "sezdi! 🎯" : "sezmadi"}</div>
+          <p className="t-sub" style={{ fontSize: 14, marginTop: 6 }}>
+            Siz yashirgan: <b style={{ color: "var(--text)" }}>{sc ? sc.label : ""}</b>{" · "}{chooserName} sezgan: <b style={{ color: correct ? "var(--good)" : "var(--bad)" }}>{gc ? gc.label : ""}</b>
+          </p>
+        </div>
+      </div>
+      <div style={{ flex: 1 }}></div>
+      <GlowButton icon="yinyang" onClick={() => { setSecret(null); setGuess(null); setShareMsg(""); setView("compose"); }}>Yana o'ynash</GlowButton>
+    </Shell>
   );
 }

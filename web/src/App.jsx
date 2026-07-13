@@ -5,21 +5,22 @@ import { Ic, ImgIcon, BottomNav } from "./ui.jsx";
 import { CosmosBG } from "./cosmos-bg.jsx";
 import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
 import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud, tgStartParam } from "./telegram.js";
-import { normalizeCode } from "./duo.js";
+import { parseParam } from "./duo.js";
 import { WelcomeScreen, NicknameScreen } from "./screens/Onboarding.jsx";
 import { HomeScreen, ModeSelectScreen } from "./screens/Home.jsx";
 import { GameScreen } from "./screens/Game.jsx";
 import { StatsScreen } from "./screens/Stats.jsx";
 import { LeaderboardScreen, ProfileScreen } from "./screens/Extra.jsx";
-import { DuoScreen } from "./screens/Duo.jsx";
+import { DuoScreen, AsyncDuo } from "./screens/Duo.jsx";
 
 export default function App() {
   const [state, setState] = React.useState(() => D.loadState());
   const [screen, setScreen] = React.useState(state.onboarded ? "home" : "welcome");
   const [game, setGame] = React.useState(null); // {mode, n}
   const [newBadges, setNewBadges] = React.useState([]);
-  const [duoCode, setDuoCode] = React.useState(null); // do'stga qo'shilish kodi (null = xona yaratish)
-  const wantDuo = React.useRef(null); // deep-link orqali kutilayotgan kod
+  const [duoCode, setDuoCode] = React.useState(null); // jonli xona kodi (null = xona yaratish)
+  const [duoToken, setDuoToken] = React.useState(null); // Telegram async chaqiruv/natija
+  const wantDuo = React.useRef(null); // deep-link orqali kutilayotgan { room } | { token }
   const myName = state.nickname || tgName() || "Do'st";
 
   // ---------- bulut sinxronlash ----------
@@ -52,19 +53,24 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  // Deep-link (Telegram startapp yoki ?room=) orqali do'stga qo'shilish
+  // Deep-link (Telegram startapp / ?g= / ?room=) orqali duelga qo'shilish
   React.useEffect(() => {
     let p = tgStartParam();
     if (!p && typeof location !== "undefined") {
-      try { p = new URLSearchParams(location.search).get("room") || ""; } catch (e) { /* ignore */ }
+      try {
+        const q = new URLSearchParams(location.search);
+        p = q.get("g") || q.get("room") || "";
+      } catch (e) { /* ignore */ }
     }
-    const code = normalizeCode(p);
-    if (code && code.length >= 4) wantDuo.current = code;
+    const parsed = parseParam(p);
+    if (parsed) wantDuo.current = parsed;
   }, []);
   React.useEffect(() => {
     if (wantDuo.current && state.onboarded && screen !== "duo") {
-      setDuoCode(wantDuo.current);
+      const w = wantDuo.current;
       wantDuo.current = null;
+      setDuoToken(w.token || null);
+      setDuoCode(w.room || null);
       setScreen("duo");
     }
   }, [state.onboarded, screen]);
@@ -191,12 +197,17 @@ export default function App() {
             onNav={setScreen}
             onStartDaily={() => setScreen("practice")}
             onPickMode={(m) => startGame(m)}
-            onDuo={() => { setDuoCode(null); setScreen("duo"); }} />
+            onDuo={() => { setDuoCode(null); setDuoToken(null); setScreen("duo"); }} />
         ) : null}
 
         {screen === "duo" ? (
-          <DuoScreen myName={myName} initialCode={duoCode}
-            onExit={() => { setDuoCode(null); setScreen("home"); }} />
+          duoToken ? (
+            <AsyncDuo myName={myName} token={duoToken}
+              onExit={() => { setDuoToken(null); setScreen("home"); }} />
+          ) : (
+            <DuoScreen myName={myName} initialCode={duoCode}
+              onExit={() => { setDuoCode(null); setScreen("home"); }} />
+          )
         ) : null}
 
         {screen === "practice" ? (
