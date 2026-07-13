@@ -1,7 +1,7 @@
 /* ===== Intui — Game flow: mood check, focus, pick, reveal, summary ===== */
 import React from "react";
 import * as D from "../data.js";
-import { Ic, Logo, Ring, GlowButton, ImgIcon, BackBtn, ModeIcon, ShapeGlyph, MoodIcon } from "../ui.jsx";
+import { Ic, Logo, Ring, GlowButton, ImgIcon, BackBtn, ModeIcon, ShapeGlyph, MoodIcon, asset } from "../ui.jsx";
 import { inTelegram, showBackButton, hideBackButton, haptic } from "../telegram.js";
 
 function buildOptions(mode, n) {
@@ -393,17 +393,103 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
 
 /* ---------- Card back ---------- */
 
+/* Karta orqasi — kosmik teksturа ustida oltin sakral-geometriya mandala.
+   Yuborilgan taro-karta dizayniga moslab qayta yaratilgan. */
+const CX = 100, CY = 152; // viewBox 200 x 304 (aspect 0.66) markazi
+function goldPetalRing(count, r, rx, ry, offset) {
+  return Array.from({ length: count }, (_, i) => {
+    const ang = offset + (360 / count) * i;
+    return { key: `${r}-${i}`, cx: CX, cy: CY - r, rx, ry, rot: ang };
+  });
+}
+function CardBackArt() {
+  const gold = "#e9c46a";
+  const goldBright = "#f7e08a";
+  const inner = goldPetalRing(12, 44, 16, 40, 0);   // ichki gulbarglar
+  const outer = goldPetalRing(12, 60, 13, 34, 15);  // tashqi gulbarglar
+  const rings = [30, 52, 74, 96, 118, 138];         // konsentrik doiralar
+  const rays = Array.from({ length: 24 }, (_, i) => (360 / 24) * i);
+  return (
+    <svg viewBox="0 0 200 304" preserveAspectRatio="xMidYMid slice"
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden="true">
+      <defs>
+        <radialGradient id="cb-core" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#fff7df" stopOpacity="1" />
+          <stop offset="0.3" stopColor={goldBright} stopOpacity="0.95" />
+          <stop offset="0.7" stopColor={gold} stopOpacity="0.25" />
+          <stop offset="1" stopColor={gold} stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="cb-halo" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#63e6c8" stopOpacity="0.28" />
+          <stop offset="0.55" stopColor="#3aa0c8" stopOpacity="0.12" />
+          <stop offset="1" stopColor="#3aa0c8" stopOpacity="0" />
+        </radialGradient>
+        <filter id="cb-glow" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="1.1" />
+        </filter>
+      </defs>
+
+      {/* teal-oltin halo — kosmik fonni referens palitraga yaqinlashtiradi */}
+      <ellipse cx={CX} cy={CY} rx="150" ry="200" fill="url(#cb-halo)" />
+
+      <g stroke={gold} fill="none" filter="url(#cb-glow)">
+        {/* konsentrik nuqtali doiralar */}
+        {rings.map((r, i) => (
+          <circle key={r} cx={CX} cy={CY} r={r} strokeWidth={i % 2 ? 0.5 : 0.7}
+            strokeOpacity={0.55 - i * 0.05} strokeDasharray={i % 2 ? "1 5" : "1 8"} />
+        ))}
+        {/* tashqi va ichki mandala gulbarglari */}
+        <g strokeOpacity="0.7" strokeWidth="0.7">
+          {outer.map((p) => (
+            <ellipse key={p.key} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry}
+              transform={`rotate(${p.rot} ${CX} ${CY})`} />
+          ))}
+        </g>
+        <g strokeOpacity="0.85" strokeWidth="0.8">
+          {inner.map((p) => (
+            <ellipse key={p.key} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry}
+              transform={`rotate(${p.rot} ${CX} ${CY})`} />
+          ))}
+        </g>
+        {/* markaziy sunburst nurlari */}
+        <g strokeOpacity="0.5" strokeWidth="0.5">
+          {rays.map((a) => (
+            <line key={a} x1={CX} y1={CY} x2={CX} y2={CY - 30}
+              transform={`rotate(${a} ${CX} ${CY})`} />
+          ))}
+        </g>
+        {/* vertikal va gorizontal o'q */}
+        <line x1={CX} y1="14" x2={CX} y2="290" strokeOpacity="0.35" strokeWidth="0.5" strokeDasharray="1 6" />
+      </g>
+
+      {/* yorqin oltin yadro */}
+      <circle cx={CX} cy={CY} r="34" fill="url(#cb-core)" />
+      <circle cx={CX} cy={CY} r="4.5" fill="#fff7df" />
+
+      {/* o'q bo'ylab yulduzcha porlashlar */}
+      {[40, 152, 264].map((y) => (
+        <g key={y} transform={`translate(${CX} ${y})`} fill={goldBright}>
+          <path d="M0 -7 L1.4 -1.4 L7 0 L1.4 1.4 L0 7 L-1.4 1.4 L-7 0 L-1.4 -1.4 Z" opacity="0.95" />
+        </g>
+      ))}
+
+      {/* oltin ramka */}
+      <rect x="5" y="5" width="190" height="294" rx="12" fill="none" stroke={gold} strokeWidth="1.4" strokeOpacity="0.85" />
+      <rect x="9" y="9" width="182" height="286" rx="9" fill="none" stroke={gold} strokeWidth="0.5" strokeOpacity="0.5" />
+    </svg>
+  );
+}
+
 function CardBack() {
   return (
-    <div className="gcard-inner" style={{ flexDirection: "column", gap: 8 }}>
-      {/* face-down mystic back */}
-      <span className="card-back-orn"></span>
-      <Ic name="star4" size={34} color="hsla(var(--accent-h),85%,75%,0.75)" />
-      <div style={{ display: "flex", gap: 5, opacity: 0.5 }}>
-        <span style={{ width: 4, height: 4, borderRadius: 99, background: "var(--accent)" }}></span>
-        <span style={{ width: 4, height: 4, borderRadius: 99, background: "var(--accent)" }}></span>
-        <span style={{ width: 4, height: 4, borderRadius: 99, background: "var(--accent)" }}></span>
-      </div>
+    <div className="gcard-inner card-back-cosmos">
+      {/* kosmik tekstura */}
+      <img src={asset("assets/cosmos.webp")} alt="" draggable={false}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 38%" }} />
+      {/* o'qish/kontrast uchun qoraytirish */}
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 90% at 50% 42%, rgba(5,8,20,0.25), rgba(5,6,16,0.72) 82%)" }}></div>
+      {/* oltin mandala */}
+      <CardBackArt />
     </div>
   );
 }
