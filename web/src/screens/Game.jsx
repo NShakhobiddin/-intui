@@ -1,7 +1,7 @@
 /* ===== Intui — Game flow: mood check, focus, pick, reveal, summary ===== */
 import React from "react";
 import * as D from "../data.js";
-import { Ic, Logo, Ring, GlowButton, ImgIcon, BackBtn, ModeIcon, ShapeGlyph, MoodIcon, asset } from "../ui.jsx";
+import { Ic, Logo, Ring, GlowButton, ImgIcon, BackBtn, ModeIcon, ShapeGlyph, MoodIcon } from "../ui.jsx";
 import { inTelegram, showBackButton, hideBackButton, haptic } from "../telegram.js";
 
 function buildOptions(mode, n) {
@@ -300,6 +300,10 @@ function GameShell({ mode, attempt, total, onExit, onFinish, children }) {
   );
 }
 
+/* Ochilgan karta va tanlov tugmalari uchun yorqin, tekis ranglar (gradientsiz) */
+const SOLID = { oq: "#ffffff", qora: "#000000", qizil: "#ff3b52", kok: "#2f7bff", yashil: "#18c26a", sariq: "#ffc21e" };
+const faceColor = (card) => SOLID[card.id] || card.color;
+
 /* ---------- Oq-qora: ochilganda butun karta oppoq yoki qopqora ---------- */
 function RevealFace({ mode, card }) {
   if (!card) return null;
@@ -311,9 +315,8 @@ function RevealFace({ mode, card }) {
       </div>
     );
   }
-  const base = card.id === "qora" ? "#000000" : card.id === "oq" ? "#ffffff" : card.color;
   return (
-    <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 6, background: base }}>
+    <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 6, background: faceColor(card) }}>
       <span style={{ fontWeight: 800, fontSize: 26, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
     </div>
   );
@@ -378,10 +381,9 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
               </button>
             );
           }
-          const hi = o.id === "qora" ? "#2a2738" : o.id === "oq" ? "#ffffff" : lighten(o.color);
           return (
             <button key={o.id} onClick={() => onPick(i)} disabled={reveal}
-              style={{ ...baseStyle, background: `radial-gradient(circle at 35% 28%, ${hi}, ${o.color})`, color: o.text }}>
+              style={{ ...baseStyle, background: faceColor(o), color: o.text }}>
               {o.label}
             </button>
           );
@@ -480,25 +482,53 @@ function CardBackArt() {
   );
 }
 
+/* Abstrakt kosmik fon — realistik foto emas, ranglar bulutlari + oltin
+   yo'llar + yulduzchalar (referens palitraga mos: teal/emerald/ko'k/binafsha/oltin) */
+function CardBackBg() {
+  const stars = React.useMemo(() => {
+    let s = 9;
+    const rnd = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+    return Array.from({ length: 46 }, () => ({ x: rnd() * 200, y: rnd() * 304, r: 0.4 + rnd() * 1.2, o: 0.25 + rnd() * 0.6 }));
+  }, []);
+  return (
+    <svg viewBox="0 0 200 304" preserveAspectRatio="xMidYMid slice"
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden="true">
+      <defs>
+        <filter id="cb-neb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" /></filter>
+      </defs>
+      <rect width="200" height="304" fill="#0a0b1e" />
+      <g filter="url(#cb-neb)" style={{ mixBlendMode: "screen" }}>
+        <ellipse cx="34" cy="52" rx="88" ry="82" fill="#1f9e8f" opacity="0.55" />
+        <ellipse cx="8" cy="150" rx="72" ry="94" fill="#28c07a" opacity="0.45" />
+        <ellipse cx="176" cy="44" rx="82" ry="76" fill="#7c4dd6" opacity="0.5" />
+        <ellipse cx="196" cy="150" rx="72" ry="98" fill="#3f74e6" opacity="0.45" />
+        <ellipse cx="44" cy="272" rx="82" ry="72" fill="#b83bb0" opacity="0.42" />
+        <ellipse cx="172" cy="286" rx="82" ry="72" fill="#28c07a" opacity="0.4" />
+        <ellipse cx="100" cy="150" rx="62" ry="62" fill="#3a86c8" opacity="0.32" />
+      </g>
+      {/* oltin tumanlik yo'llari */}
+      <g filter="url(#cb-neb)" style={{ mixBlendMode: "screen" }}>
+        <path d="M-12 42 Q60 74 122 18" stroke="#e9c46a" strokeWidth="11" fill="none" opacity="0.3" />
+        <path d="M212 262 Q150 232 88 288" stroke="#e9c46a" strokeWidth="11" fill="none" opacity="0.28" />
+      </g>
+      <g fill="#fff">
+        {stars.map((st, i) => <circle key={i} cx={st.x} cy={st.y} r={st.r} opacity={st.o} />)}
+      </g>
+    </svg>
+  );
+}
+
 function CardBack() {
   return (
     <div className="gcard-inner card-back-cosmos">
-      {/* kosmik tekstura */}
-      <img src={asset("assets/cosmos.webp")} alt="" draggable={false}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 38%" }} />
-      {/* o'qish/kontrast uchun qoraytirish */}
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 90% at 50% 42%, rgba(5,8,20,0.25), rgba(5,6,16,0.72) 82%)" }}></div>
+      {/* abstrakt fon */}
+      <CardBackBg />
+      {/* kontrast uchun yumshoq qoraytirish */}
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 90% at 50% 44%, rgba(5,8,20,0.12), rgba(5,6,16,0.58) 86%)" }}></div>
       {/* oltin mandala */}
       <CardBackArt />
     </div>
   );
-}
-
-function lighten(hex) {
-  // simple lighten for the disc highlight
-  const c = parseInt(hex.slice(1), 16);
-  const f = (v) => Math.min(255, Math.round(v + (255 - v) * 0.35));
-  return `rgb(${f(c >> 16)}, ${f((c >> 8) & 255)}, ${f(c & 255)})`;
 }
 
 /* ---------- Summary + journal ---------- */
