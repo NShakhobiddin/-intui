@@ -28,6 +28,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_TG_LINK: ${{ secrets.VITE_TG_LINK }}
       # Build natijasini branch ildiziga ham commit qilamiz — shunda Pages
       # "Deploy from a branch" (legacy) rejimida qolsa ham sayt tayyor
       # ilovani ko'rsatadi. GITHUB_TOKEN push'i workflow'ni qayta ishga
