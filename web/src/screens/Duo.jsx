@@ -117,6 +117,8 @@ export function DuoScreen({ myName, initialCode, onExit }) {
   const [codeInput, setCodeInput] = React.useState("");
   const [shareMsg, setShareMsg] = React.useState("");
   const [asyncCompose, setAsyncCompose] = React.useState(false);
+  const [chanStatus, setChanStatus] = React.useState(""); // SUBSCRIBED | TIMED_OUT | CHANNEL_ERROR | CLOSED
+  const [slow, setSlow] = React.useState(false); // ulanish/kutish cho'zilib ketdi
 
   const conn = React.useRef(null);
   const scoredRound = React.useRef(-1);
@@ -166,6 +168,13 @@ export function DuoScreen({ myName, initialCode, onExit }) {
       onMove: (p) => {
         if (!p) return;
         if (p.t === "round") { applyRound(p.round, p.mode); return; }
+        // Guest ulandi-yu boshlanish xabari yetmagan bo'lsa — host qayta yuboradi
+        if (p.t === "sync-req") {
+          if (S.current.isHost && startedRef.current && conn.current) {
+            conn.current.send({ t: "round", round: S.current.round < 0 ? 0 : S.current.round, mode: S.current.mode });
+          }
+          return;
+        }
         if (p.round !== S.current.round) return;
         if (p.t === "chosen") { setFriendChose(true); return; }
         if (p.t === "guess") {
@@ -178,9 +187,35 @@ export function DuoScreen({ myName, initialCode, onExit }) {
         }
         if (p.t === "reveal") { applyReveal(p.round, p.secret, p.guess, p.correct); return; }
       },
-      onStatus: () => {},
+      onStatus: (st) => setChanStatus(st),
     });
   }, [myName]);
+
+  const connError = ["TIMED_OUT", "CLOSED", "CHANNEL_ERROR"].includes(chanStatus);
+
+  // Ulanish/kutish 12s dan oshsa — foydali xabar chiqarish (cheksiz aylanmasin)
+  React.useEffect(() => {
+    const waiting = (view === "connecting" || view === "invite") && !bothHere;
+    if (!waiting) { setSlow(false); return; }
+    const t = setTimeout(() => setSlow(true), 12000);
+    return () => clearTimeout(t);
+  }, [view, bothHere]);
+
+  const retry = () => {
+    if (conn.current) { conn.current.leave(); conn.current = null; }
+    startedRef.current = false;
+    setRoster([]); setSlow(false); setChanStatus("");
+    startConn(code, isHost, mode);
+  };
+
+  // Guest ikkalasi ulanib, lekin raund hali kelmagan bo'lsa — hostdan so'raydi
+  React.useEffect(() => {
+    if (isHost || !bothHere || round >= 0 || !conn.current) return;
+    const t = setInterval(() => {
+      if (conn.current && S.current.round < 0) conn.current.send({ t: "sync-req" });
+    }, 1500);
+    return () => clearInterval(t);
+  }, [isHost, bothHere, round]);
 
   function applyReveal(r, sec, g, correct) {
     setReveal({ secret: sec, guess: g, correct });
@@ -320,6 +355,19 @@ export function DuoScreen({ myName, initialCode, onExit }) {
         </div>
         <div style={{ flex: 1 }}></div>
         <Waiting text="Do'stingiz kutilmoqda…" />
+        {connError ? (
+          <div className="panel" style={{ marginTop: 14, padding: 16, textAlign: "center", borderColor: "rgba(251,113,133,0.3)" }}>
+            <p className="t-sub" style={{ fontSize: 13.5, color: "var(--bad)" }}>Serverga ulanib bo'lmadi (Realtime). Internetni tekshiring yoki qayta urining.</p>
+            <button className="btn-ghost" style={{ marginTop: 12, minHeight: 46 }} onClick={retry}>Qayta urinish</button>
+          </div>
+        ) : slow ? (
+          <div className="panel" style={{ marginTop: 14, padding: 16, textAlign: "center" }}>
+            <p className="t-sub" style={{ fontSize: 13.5 }}>Do'stingiz hali qo'shilmadi. Havola/kod yuborilganini va u ham "Jonli" rejimda ekanini tekshiring.</p>
+            <button onClick={() => setAsyncCompose(true)} style={{ color: "var(--accent)", fontSize: 14, fontWeight: 700, marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, width: "100%" }}>
+              Yoki Telegram orqali navbat bilan yuborish <Ic name="chevR" size={15} />
+            </button>
+          </div>
+        ) : null}
         <div style={{ flex: 1 }}></div>
       </Shell>
     );
@@ -327,10 +375,25 @@ export function DuoScreen({ myName, initialCode, onExit }) {
 
   // ---------- Ulanmoqda (guest) ----------
   if (view === "connecting" && !bothHere) {
+    const problem = connError || slow;
     return (
       <Shell onExit={exit} title="Ulanmoqda">
         <div style={{ flex: 1 }}></div>
         <Waiting text={"Xonaga ulanmoqda…  " + code} />
+        {problem ? (
+          <div className="panel" style={{ marginTop: 16, padding: 18, textAlign: "center", borderColor: connError ? "rgba(251,113,133,0.3)" : undefined }}>
+            <div style={{ fontWeight: 700, fontSize: 15 }}>{connError ? "Ulanib bo'lmadi" : "Ulanish cho'zilyapti"}</div>
+            <p className="t-sub" style={{ fontSize: 13.5, marginTop: 6 }}>
+              {connError
+                ? "Serverga (Realtime) ulanib bo'lmadi. Internetni tekshiring."
+                : "Kod to'g'riligini va do'stingiz \"Jonli chaqirish\" bilan xona ochganini tekshiring. Xona egasi ilovada turishi kerak."}
+            </p>
+            <button className="btn-ghost" style={{ marginTop: 12, minHeight: 48 }} onClick={retry}>Qayta urinish</button>
+            <button onClick={() => setAsyncCompose(true)} style={{ color: "var(--accent)", fontSize: 14, fontWeight: 700, marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, width: "100%" }}>
+              Yoki Telegram orqali navbat bilan <Ic name="chevR" size={15} />
+            </button>
+          </div>
+        ) : null}
         <div style={{ flex: 1 }}></div>
       </Shell>
     );
