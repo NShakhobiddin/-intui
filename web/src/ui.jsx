@@ -90,7 +90,19 @@ export function Ic({ name, size = 22, color = "currentColor", style }) {
     <g><circle cx="12" cy="12" r="8.5" fill="none" stroke={color} strokeWidth={sw} />{P("M9.5 9.5A2.5 2.5 0 1 1 12 12.5v1.2")}<circle cx="12" cy="16.8" r="0.9" fill={color} /></g>,
 
     pencil:
-    <g>{P("M14.5 5.5 18.5 9.5 8.5 19.5H4.5v-4l10-10Z")}{P("M12.8 7.2l4 4")}</g>
+    <g>{P("M14.5 5.5 18.5 9.5 8.5 19.5H4.5v-4l10-10Z")}{P("M12.8 7.2l4 4")}</g>,
+
+    // ikki figura + o'rtasida uchqun (do'st bilan o'ynash)
+    duo:
+    <g>
+      <circle cx="6.9" cy="7.2" r="2.4" fill="none" stroke={color} strokeWidth={sw} />
+      {P("M3.4 15.4a3.5 3.5 0 0 1 7 0")}
+      <circle cx="17.1" cy="7.2" r="2.4" fill="none" stroke={color} strokeWidth={sw} />
+      {P("M13.6 15.4a3.5 3.5 0 0 1 7 0")}
+      <g transform="translate(12 10.9) scale(0.42) translate(-12 -12)">
+        <path d="M12 3.5c.6 4 2.5 7.9 8.5 8.5-6 .6-7.9 4.5-8.5 8.5-.6-4-2.5-7.9-8.5-8.5 6-.6 7.9-4.5 8.5-8.5Z" fill={color} />
+      </g>
+    </g>
 
   };
   return (

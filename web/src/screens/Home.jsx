@@ -26,7 +26,7 @@ export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode
 
         {/* Do'st bilan o'ynash */}
         <button className="panel row-press" onClick={onDuo} style={{ width: "100%", marginTop: 12, padding: "15px 18px", display: "flex", alignItems: "center", gap: 13, cursor: "pointer", textAlign: "left", border: "1px solid hsla(var(--accent-h),88%,74%,0.3)" }}>
-          <div className="mode-tile" style={{ width: 44, height: 44, borderRadius: 14 }}><Ic name="bolt" size={22} color="var(--accent)" /></div>
+          <div className="mode-tile" style={{ width: 44, height: 44, borderRadius: 14 }}><Ic name="duo" size={24} color="var(--accent)" /></div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: 16 }}>Do'st bilan o'ynash</div>
             <div className="t-micro" style={{ marginTop: 2 }}>Onlayn sezgi dueli — biri yashiradi, biri sezadi</div>
