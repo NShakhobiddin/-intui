@@ -176,13 +176,15 @@ export default function App() {
 
   // ---------- render ----------
   const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo";
+  // Mashq/o'yin paytida jonli fon o'chadi (qizishni kamaytiradi, diqqatni jamlaydi)
+  const heavyPlay = screen === "game" || screen === "duo";
   // 247 — prototip standart aksenti #8b7cf6 ning hue qiymati
   const appStyle = { "--accent-h": 247, "--speed": 1 };
 
   return (
     <div className="stage">
       <div className="app" style={appStyle}>
-        <CosmosBG />
+        {heavyPlay ? null : <CosmosBG />}
 
         {/* Telegramda ism botdan olinadi — nickname so'ralmaydi */}
         {screen === "welcome" ? <WelcomeScreen onStart={() => {
