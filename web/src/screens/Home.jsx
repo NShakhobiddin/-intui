@@ -1,7 +1,20 @@
 /* ===== Intui — Home + Mode select ===== */
 import React from "react";
 import * as D from "../data.js";
-import { Ic, Logo, Ring, GlowButton, ImgIcon, SectionHead, ModeIcon, DiffPill } from "../ui.jsx";
+import { Ic, Logo, Ring, GlowButton, ImgIcon, SectionHead, ModeIcon, DiffPill, asset } from "../ui.jsx";
+
+// "Do'st bilan o'ynash" ikonкаси: agar assets/duo.png yuklangan bo'lsa —
+// aynan o'sha rasm; bo'lmasa — vektor ikonка (yiqilmaydi).
+function DuoEntryIcon() {
+  const [failed, setFailed] = React.useState(false);
+  if (failed) {
+    return <div className="mode-tile" style={{ width: 44, height: 44, borderRadius: 14, flex: "none" }}><Ic name="duo" size={24} color="var(--accent)" /></div>;
+  }
+  return (
+    <img src={asset("assets/duo.png")} alt="" draggable={false} onError={() => setFailed(true)}
+      style={{ width: 44, height: 44, borderRadius: 14, objectFit: "cover", display: "block", flex: "none" }} />
+  );
+}
 
 export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode, onDuo }) {
   const todayMin = D.minutesOn(state.sessions, D.todayStr());
@@ -26,7 +39,7 @@ export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode
 
         {/* Do'st bilan o'ynash */}
         <button className="panel row-press" onClick={onDuo} style={{ width: "100%", marginTop: 12, padding: "15px 18px", display: "flex", alignItems: "center", gap: 13, cursor: "pointer", textAlign: "left", border: "1px solid hsla(var(--accent-h),88%,74%,0.3)" }}>
-          <div className="mode-tile" style={{ width: 44, height: 44, borderRadius: 14 }}><Ic name="duo" size={24} color="var(--accent)" /></div>
+          <DuoEntryIcon />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: 16 }}>Do'st bilan o'ynash</div>
             <div className="t-micro" style={{ marginTop: 2 }}>Onlayn sezgi dueli — biri yashiradi, biri sezadi</div>
