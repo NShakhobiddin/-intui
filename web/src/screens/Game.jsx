@@ -308,10 +308,11 @@ export const faceColor = (card) => SOLID[card.id] || card.color;
 function RevealFace({ mode, card }) {
   if (!card) return null;
   if (mode.id === "shape") {
+    // Shaklli rejimда karta ochilganда yuzi oppoq, shakl esa qorong'i rangda
     return (
-      <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 10, background: "radial-gradient(120% 100% at 50% 0%, hsla(var(--accent-h),85%,72%,0.16), transparent 70%)" }}>
-        <ShapeGlyph shape={card.shape} size={56} />
-        <span style={{ fontSize: 15, fontWeight: 700, color: "var(--muted)" }}>{card.label}</span>
+      <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 10, background: "#ffffff" }}>
+        <ShapeGlyph shape={card.shape} size={56} color="#241f3d" />
+        <span style={{ fontSize: 15, fontWeight: 700, color: "#3f3a63" }}>{card.label}</span>
       </div>
     );
   }
