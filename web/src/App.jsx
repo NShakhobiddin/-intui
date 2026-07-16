@@ -2,7 +2,7 @@
 import React from "react";
 import * as D from "./data.js";
 import { Ic, ImgIcon, BottomNav } from "./ui.jsx";
-import { CosmosBG } from "./cosmos-bg.jsx";
+import { CosmosBG, CosmosStatic } from "./cosmos-bg.jsx";
 import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
 import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud, tgStartParam } from "./telegram.js";
 import { parseParam } from "./duo.js";
@@ -176,7 +176,7 @@ export default function App() {
 
   // ---------- render ----------
   const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo";
-  // Mashq/o'yin paytida jonli fon o'chadi (qizishni kamaytiradi, diqqatni jamlaydi)
+  // Mashq/o'yin paytida jonli animatsiya o'chadi — asosiy rasm statik ko'rinadi
   const heavyPlay = screen === "game" || screen === "duo";
   // 247 — prototip standart aksenti #8b7cf6 ning hue qiymati
   const appStyle = { "--accent-h": 247, "--speed": 1 };
@@ -184,7 +184,7 @@ export default function App() {
   return (
     <div className="stage">
       <div className="app" style={appStyle}>
-        {heavyPlay ? null : <CosmosBG />}
+        {heavyPlay ? <CosmosStatic /> : <CosmosBG />}
 
         {/* Telegramda ism botdan olinadi — nickname so'ralmaydi */}
         {screen === "welcome" ? <WelcomeScreen onStart={() => {

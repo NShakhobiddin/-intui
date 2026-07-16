@@ -309,6 +309,24 @@ function CosmosScene() {
   );
 }
 
+// ── Statik fon: faqat kosmik rasm (animatsiyasiz) + qoraytirish ──
+// Mashq/o'yin paytida ishlatiladi — hech qanday rAF yoki qatlam yo'q,
+// shuning uchun protsessor/GPU ga yuk bermaydi.
+export function CosmosStatic() {
+  return (
+    <div aria-hidden="true" style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0, background: "#0b0820" }}>
+      <img src={asset("assets/cosmos.webp")} alt="" draggable={false} style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", objectPosition: "50% 42%", transform: "scale(1.07)",
+      }} />
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(180deg, rgba(6,5,14,0.30) 0%, rgba(6,5,14,0.50) 40%, rgba(5,4,16,0.72) 78%, rgba(4,3,12,0.82) 100%)",
+      }}></div>
+    </div>
+  );
+}
+
 // ── Fon o'rami: .app ichini to'liq qoplaydi (cover) + o'qish uchun qoraytirish ──
 export function CosmosBG() {
   const ref = React.useRef(null);
