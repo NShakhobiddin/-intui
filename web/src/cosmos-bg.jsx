@@ -21,24 +21,41 @@ function cosmosRand(seed) {
   };
 }
 
-// umumiy soat — bitta rAF, hamma obunachilar
+// umumiy soat — bitta rAF, hamma obunachilar.
+// Batareya/qizishni kamaytirish uchun: ~16fps va sahifa ko'rinmay
+// qolганда (boshqa chatga o'tilса) animatsiya butunlay to'xtaydi.
+const FRAME_MS = 62; // ~16fps — sekin ambient fon uchun yetarli
 const CosmosClock = (() => {
   const subs = new Set();
   let raf = null, t0 = 0, last = 0;
   function loop(now) {
     raf = requestAnimationFrame(loop);
-    if (now - last < 33) return; // ~30fps
+    if (now - last < FRAME_MS) return;
     last = now;
     const t = ((now - t0) / 1000) % CLOOP;
     subs.forEach((fn) => fn(t));
   }
+  function start() {
+    if (raf || !subs.size) return;
+    if (typeof document !== "undefined" && document.hidden) return;
+    t0 = performance.now(); last = 0;
+    raf = requestAnimationFrame(loop);
+  }
+  function stop() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stop(); else start();
+    });
+  }
   return {
     sub(fn) {
       subs.add(fn);
-      if (!raf) { t0 = performance.now(); last = 0; raf = requestAnimationFrame(loop); }
+      start();
       return () => {
         subs.delete(fn);
-        if (!subs.size && raf) { cancelAnimationFrame(raf); raf = null; }
+        if (!subs.size) stop();
       };
     },
   };
@@ -78,7 +95,7 @@ function CosmosBase() {
 const CSTARS = (() => {
   const rand = cosmosRand(42);
   const out = [];
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < 34; i++) {
     out.push({
       x: rand() * 941, y: rand() * 1150,
       size: 1 + rand() * 2.6,
@@ -242,7 +259,7 @@ function CosmosFog() {
 const CMOTES = (() => {
   const rand = cosmosRand(7);
   const out = [];
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 8; i++) {
     out.push({
       x: 60 + rand() * 820, yStart: 1250 + rand() * 380,
       rise: 220 + rand() * 320, size: 1.5 + rand() * 2.5,
