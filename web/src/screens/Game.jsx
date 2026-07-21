@@ -427,138 +427,65 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
 
 /* ---------- Card back ---------- */
 
-/* Karta orqasi — kosmik teksturа ustida oltin sakral-geometriya mandala.
-   Yuborilgan taro-karta dizayniga moslab qayta yaratilgan. */
-const CX = 100, CY = 152; // viewBox 200 x 304 (aspect 0.66) markazi
-function goldPetalRing(count, r, rx, ry, offset) {
-  return Array.from({ length: count }, (_, i) => {
-    const ang = offset + (360 / count) * i;
-    return { key: `${r}-${i}`, cx: CX, cy: CY - r, rx, ry, rot: ang };
+/* Karta orqasi — qora-oq gipnoz spiral (yuborilgan dizaynga moslab). */
+const CBX = 100, CBY = 152; // viewBox 200 x 304
+const CB_WHITE = "#f2efe6";
+const CB_BLACK = "#0b0b0b";
+
+// markaziy gipnoz spiral yo'li (bir marta hisoblanadi)
+const SPIRAL_PATH = (() => {
+  const R = 86, turns = 5, T = turns * 2 * Math.PI, steps = turns * 90, half = R / (2 * turns);
+  const pt = (th, r) => [CBX + r * Math.cos(th), CBY + r * Math.sin(th)];
+  const out = [], inn = [];
+  for (let i = 0; i <= steps; i++) { const th = T * i / steps; out.push(pt(th, R * (1 - i / steps))); }
+  for (let i = steps; i >= 0; i--) { const th = T * i / steps; inn.push(pt(th, Math.max(0, R * (1 - i / steps) - half))); }
+  return "M " + out.concat(inn).map((p) => p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" L ") + " Z";
+})();
+
+function cbBurst(cx, cy, r, n, ln) {
+  return Array.from({ length: n }, (_, k) => {
+    const a = 2 * Math.PI * k / n;
+    return { k, x1: cx + r * Math.cos(a), y1: cy + r * Math.sin(a), x2: cx + (r + ln) * Math.cos(a), y2: cy + (r + ln) * Math.sin(a) };
   });
 }
-function CardBackArt() {
-  const gold = "#e9c46a";
-  const goldBright = "#f7e08a";
-  const inner = goldPetalRing(12, 44, 16, 40, 0);   // ichki gulbarglar
-  const outer = goldPetalRing(12, 60, 13, 34, 15);  // tashqi gulbarglar
-  const rings = [30, 52, 74, 96, 118, 138];         // konsentrik doiralar
-  const rays = Array.from({ length: 24 }, (_, i) => (360 / 24) * i);
-  return (
-    <svg viewBox="0 0 200 304" preserveAspectRatio="xMidYMid slice"
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden="true">
-      <defs>
-        <radialGradient id="cb-core" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#fff7df" stopOpacity="1" />
-          <stop offset="0.3" stopColor={goldBright} stopOpacity="0.95" />
-          <stop offset="0.7" stopColor={gold} stopOpacity="0.25" />
-          <stop offset="1" stopColor={gold} stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="cb-halo" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#63e6c8" stopOpacity="0.28" />
-          <stop offset="0.55" stopColor="#3aa0c8" stopOpacity="0.12" />
-          <stop offset="1" stopColor="#3aa0c8" stopOpacity="0" />
-        </radialGradient>
-        <filter id="cb-glow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="1.1" />
-        </filter>
-      </defs>
-
-      {/* teal-oltin halo — kosmik fonni referens palitraga yaqinlashtiradi */}
-      <ellipse cx={CX} cy={CY} rx="150" ry="200" fill="url(#cb-halo)" />
-
-      <g stroke={gold} fill="none" filter="url(#cb-glow)">
-        {/* konsentrik nuqtali doiralar */}
-        {rings.map((r, i) => (
-          <circle key={r} cx={CX} cy={CY} r={r} strokeWidth={i % 2 ? 0.5 : 0.7}
-            strokeOpacity={0.55 - i * 0.05} strokeDasharray={i % 2 ? "1 5" : "1 8"} />
-        ))}
-        {/* tashqi va ichki mandala gulbarglari */}
-        <g strokeOpacity="0.7" strokeWidth="0.7">
-          {outer.map((p) => (
-            <ellipse key={p.key} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry}
-              transform={`rotate(${p.rot} ${CX} ${CY})`} />
-          ))}
-        </g>
-        <g strokeOpacity="0.85" strokeWidth="0.8">
-          {inner.map((p) => (
-            <ellipse key={p.key} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry}
-              transform={`rotate(${p.rot} ${CX} ${CY})`} />
-          ))}
-        </g>
-        {/* markaziy sunburst nurlari */}
-        <g strokeOpacity="0.5" strokeWidth="0.5">
-          {rays.map((a) => (
-            <line key={a} x1={CX} y1={CY} x2={CX} y2={CY - 30}
-              transform={`rotate(${a} ${CX} ${CY})`} />
-          ))}
-        </g>
-        {/* vertikal va gorizontal o'q */}
-        <line x1={CX} y1="14" x2={CX} y2="290" strokeOpacity="0.35" strokeWidth="0.5" strokeDasharray="1 6" />
-      </g>
-
-      {/* yorqin oltin yadro */}
-      <circle cx={CX} cy={CY} r="34" fill="url(#cb-core)" />
-      <circle cx={CX} cy={CY} r="4.5" fill="#fff7df" />
-
-      {/* o'q bo'ylab yulduzcha porlashlar */}
-      {[40, 152, 264].map((y) => (
-        <g key={y} transform={`translate(${CX} ${y})`} fill={goldBright}>
-          <path d="M0 -7 L1.4 -1.4 L7 0 L1.4 1.4 L0 7 L-1.4 1.4 L-7 0 L-1.4 -1.4 Z" opacity="0.95" />
-        </g>
-      ))}
-
-      {/* oltin ramka */}
-      <rect x="5" y="5" width="190" height="294" rx="12" fill="none" stroke={gold} strokeWidth="1.4" strokeOpacity="0.85" />
-      <rect x="9" y="9" width="182" height="286" rx="9" fill="none" stroke={gold} strokeWidth="0.5" strokeOpacity="0.5" />
-    </svg>
-  );
-}
-
-/* Abstrakt kosmik fon — realistik foto emas, ranglar bulutlari + oltin
-   yo'llar + yulduzchalar (referens palitraga mos: teal/emerald/ko'k/binafsha/oltin) */
-function CardBackBg() {
-  const stars = React.useMemo(() => {
-    let s = 9;
-    const rnd = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    return Array.from({ length: 46 }, () => ({ x: rnd() * 200, y: rnd() * 304, r: 0.4 + rnd() * 1.2, o: 0.25 + rnd() * 0.6 }));
-  }, []);
-  return (
-    <svg viewBox="0 0 200 304" preserveAspectRatio="xMidYMid slice"
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden="true">
-      <defs>
-        <filter id="cb-neb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" /></filter>
-      </defs>
-      <rect width="200" height="304" fill="#0a0b1e" />
-      <g filter="url(#cb-neb)" style={{ mixBlendMode: "screen" }}>
-        <ellipse cx="34" cy="52" rx="88" ry="82" fill="#1f9e8f" opacity="0.55" />
-        <ellipse cx="8" cy="150" rx="72" ry="94" fill="#28c07a" opacity="0.45" />
-        <ellipse cx="176" cy="44" rx="82" ry="76" fill="#7c4dd6" opacity="0.5" />
-        <ellipse cx="196" cy="150" rx="72" ry="98" fill="#3f74e6" opacity="0.45" />
-        <ellipse cx="44" cy="272" rx="82" ry="72" fill="#b83bb0" opacity="0.42" />
-        <ellipse cx="172" cy="286" rx="82" ry="72" fill="#28c07a" opacity="0.4" />
-        <ellipse cx="100" cy="150" rx="62" ry="62" fill="#3a86c8" opacity="0.32" />
-      </g>
-      {/* oltin tumanlik yo'llari */}
-      <g filter="url(#cb-neb)" style={{ mixBlendMode: "screen" }}>
-        <path d="M-12 42 Q60 74 122 18" stroke="#e9c46a" strokeWidth="11" fill="none" opacity="0.3" />
-        <path d="M212 262 Q150 232 88 288" stroke="#e9c46a" strokeWidth="11" fill="none" opacity="0.28" />
-      </g>
-      <g fill="#fff">
-        {stars.map((st, i) => <circle key={i} cx={st.x} cy={st.y} r={st.r} opacity={st.o} />)}
-      </g>
-    </svg>
-  );
+function cbStar4(cx, cy, rad) {
+  const q = rad * 0.32;
+  return `M ${cx} ${cy - rad} L ${cx + q} ${cy - q} L ${cx + rad} ${cy} L ${cx + q} ${cy + q} L ${cx} ${cy + rad} L ${cx - q} ${cy + q} L ${cx - rad} ${cy} L ${cx - q} ${cy - q} Z`;
 }
 
 export function CardBack() {
+  const rays = Array.from({ length: 72 }, (_, k) => (2 * Math.PI * k) / 72);
+  const corners = [[30, 34], [170, 34], [30, 270], [170, 270]];
+  const edges = [[100, 28], [100, 276], [14, 152], [186, 152]];
   return (
-    <div className="gcard-inner card-back-cosmos">
-      {/* abstrakt fon */}
-      <CardBackBg />
-      {/* kontrast uchun yumshoq qoraytirish */}
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 90% at 50% 44%, rgba(5,8,20,0.12), rgba(5,6,16,0.58) 86%)" }}></div>
-      {/* oltin mandala */}
-      <CardBackArt />
+    <div className="gcard-inner" style={{ borderRadius: "inherit", overflow: "hidden", background: CB_BLACK }}>
+      <svg viewBox="0 0 200 304" preserveAspectRatio="xMidYMid slice"
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden="true">
+        <rect width="200" height="304" fill={CB_BLACK} />
+        <path d={SPIRAL_PATH} fill={CB_WHITE} />
+        <circle cx={CBX} cy={CBY} r="90" fill="none" stroke={CB_WHITE} strokeWidth="1" />
+        <circle cx={CBX} cy={CBY} r="103" fill="none" stroke={CB_WHITE} strokeWidth="0.6" strokeDasharray="1 4" />
+        <g stroke={CB_WHITE} strokeWidth="0.5" strokeOpacity="0.85">
+          {rays.map((a, i) => (
+            <line key={i} x1={CBX + 92 * Math.cos(a)} y1={CBY + 92 * Math.sin(a)} x2={CBX + 100 * Math.cos(a)} y2={CBY + 100 * Math.sin(a)} />
+          ))}
+        </g>
+        <rect x="6" y="6" width="188" height="292" rx="16" fill="none" stroke={CB_WHITE} strokeWidth="2" />
+        <rect x="11" y="11" width="178" height="282" rx="12" fill="none" stroke={CB_WHITE} strokeWidth="0.7" />
+        {corners.map(([cx, cy], i) => (
+          <g key={"c" + i}>
+            <circle cx={cx} cy={cy} r="15" fill={CB_BLACK} stroke={CB_WHITE} strokeWidth="1" />
+            {cbBurst(cx, cy, 2, 16, 11).map((b) => <line key={b.k} x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} stroke={CB_WHITE} strokeWidth="0.8" />)}
+            <circle cx={cx} cy={cy} r="2" fill={CB_WHITE} />
+          </g>
+        ))}
+        {edges.map(([cx, cy], i) => (
+          <g key={"e" + i}>
+            <circle cx={cx} cy={cy} r="9" fill={CB_BLACK} stroke={CB_WHITE} strokeWidth="1" />
+            <path d={cbStar4(cx, cy, 5)} fill={CB_WHITE} />
+          </g>
+        ))}
+      </svg>
     </div>
   );
 }
