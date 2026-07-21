@@ -311,14 +311,14 @@ function RevealFace({ mode, card }) {
     // Shaklli rejimда karta ochilganда yuzi oppoq, shakl esa qorong'i rangda
     return (
       <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 10, background: "#ffffff" }}>
-        <ShapeGlyph shape={card.shape} size={56} color="#241f3d" />
+        <ShapeGlyph shape={card.shape} size={74} color="#241f3d" />
         <span style={{ fontSize: 15, fontWeight: 700, color: "#3f3a63" }}>{card.label}</span>
       </div>
     );
   }
   return (
     <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 6, background: faceColor(card) }}>
-      <span style={{ fontWeight: 800, fontSize: 26, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
+      <span style={{ fontWeight: 800, fontSize: 34, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
     </div>
   );
 }
@@ -335,7 +335,7 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
   const cols = n <= 3 ? n : n === 4 ? 2 : 3;
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 6 }}>
-      <div className="flip-wrap" style={{ width: 150 }}>
+      <div className="flip-wrap" style={{ width: 200 }}>
         <div className={cardCls.join(" ")} style={{ width: "100%", display: "block" }}>
           <div className={"flipper" + (reveal ? " flipped" : "")}>
             <CardBack />
