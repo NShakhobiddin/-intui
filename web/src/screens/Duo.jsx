@@ -27,16 +27,13 @@ function DuoFace({ mode, card }) {
   if (!card) return null;
   if (mode === "shape") {
     return (
-      <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 10, background: "#ffffff" }}>
-        <ShapeGlyph shape={card.shape} size={82} color="#241f3d" />
-        <span style={{ fontSize: 15, fontWeight: 700, color: "#3f3a63" }}>{card.label}</span>
+      <div className="gcard-inner face-back" aria-label={card.label} style={{ borderRadius: "inherit", background: "#ffffff" }}>
+        <ShapeGlyph shape={card.shape} size={128} color="#241f3d" />
       </div>
     );
   }
   return (
-    <div className="gcard-inner face-back" style={{ borderRadius: "inherit", background: faceColor(card) }}>
-      <span style={{ fontWeight: 800, fontSize: 38, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
-    </div>
+    <div className="gcard-inner face-back" aria-label={card.label} style={{ borderRadius: "inherit", background: faceColor(card) }}></div>
   );
 }
 
@@ -73,18 +70,15 @@ function DuoChoices({ mode, options, onPick, disabled }) {
         };
         if (mode === "shape") {
           return (
-            <button key={o.id} disabled={disabled} onClick={() => onPick(i)}
-              style={{ ...base, flexDirection: "column", gap: 5, minHeight: 68, background: "rgba(255,255,255,0.05)" }}>
-              <ShapeGlyph shape={o.shape} size={24} />
-              <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--muted)" }}>{o.label}</span>
+            <button key={o.id} disabled={disabled} onClick={() => onPick(i)} aria-label={o.label}
+              style={{ ...base, minHeight: 68, background: "rgba(255,255,255,0.05)" }}>
+              <ShapeGlyph shape={o.shape} size={34} />
             </button>
           );
         }
         return (
-          <button key={o.id} disabled={disabled} onClick={() => onPick(i)}
-            style={{ ...base, background: faceColor(o), color: o.text }}>
-            {o.label}
-          </button>
+          <button key={o.id} disabled={disabled} onClick={() => onPick(i)} aria-label={o.label}
+            style={{ ...base, minHeight: 58, background: faceColor(o) }}></button>
         );
       })}
     </div>

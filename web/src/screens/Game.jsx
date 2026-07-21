@@ -308,18 +308,16 @@ export const faceColor = (card) => SOLID[card.id] || card.color;
 function RevealFace({ mode, card }) {
   if (!card) return null;
   if (mode.id === "shape") {
-    // Shaklli rejimда karta ochilganда yuzi oppoq, shakl esa qorong'i rangda
+    // Shaklli rejimда karta ochilganда yuzi oppoq, shakl qorong'i va katta
     return (
-      <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 10, background: "#ffffff" }}>
-        <ShapeGlyph shape={card.shape} size={92} color="#241f3d" />
-        <span style={{ fontSize: 15, fontWeight: 700, color: "#3f3a63" }}>{card.label}</span>
+      <div className="gcard-inner face-back" aria-label={card.label} style={{ borderRadius: "inherit", background: "#ffffff" }}>
+        <ShapeGlyph shape={card.shape} size={150} color="#241f3d" />
       </div>
     );
   }
+  // Rangli/oq-qora: faqat rang (yozuvsiz)
   return (
-    <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 6, background: faceColor(card) }}>
-      <span style={{ fontWeight: 800, fontSize: 42, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
-    </div>
+    <div className="gcard-inner face-back" aria-label={card.label} style={{ borderRadius: "inherit", background: faceColor(card) }}></div>
   );
 }
 
@@ -348,9 +346,7 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
           {isShape ? "Kartada qaysi shakl?" : "Karta qaysi rangda?"}
         </p>
       ) : (
-        <p style={{ textAlign: "center", color: "var(--muted)", fontWeight: 700, fontSize: 17, marginTop: 16 }}>
-          Karta: <span style={{ color: correct ? "var(--good)" : "var(--bad)" }}>{options[secret] ? options[secret].label : ""}</span>
-        </p>
+        <div style={{ height: 16 }}></div>
       )}
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 10, marginTop: 12, width: "100%", maxWidth: n === 2 ? 340 : 410 }}>
         {options.map((o, i) => {
@@ -375,18 +371,15 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
           };
           if (isShape) {
             return (
-              <button key={o.id} onClick={() => onPick(i)} disabled={reveal}
-                style={{ ...baseStyle, flexDirection: "column", gap: 5, minHeight: 64, background: "rgba(255,255,255,0.045)" }}>
-                <ShapeGlyph shape={o.shape} size={24} />
-                <span style={{ fontSize: n > 4 ? 11.5 : 12.5, fontWeight: 700, color: "var(--muted)" }}>{o.label}</span>
+              <button key={o.id} onClick={() => onPick(i)} disabled={reveal} aria-label={o.label}
+                style={{ ...baseStyle, minHeight: 64, background: "rgba(255,255,255,0.045)" }}>
+                <ShapeGlyph shape={o.shape} size={34} />
               </button>
             );
           }
           return (
-            <button key={o.id} onClick={() => onPick(i)} disabled={reveal}
-              style={{ ...baseStyle, background: faceColor(o), color: o.text }}>
-              {o.label}
-            </button>
+            <button key={o.id} onClick={() => onPick(i)} disabled={reveal} aria-label={o.label}
+              style={{ ...baseStyle, minHeight: 58, background: faceColor(o) }}></button>
           );
         })}
       </div>
