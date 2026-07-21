@@ -63,6 +63,18 @@ Ikki rejim bor va ilova avtomatik moslashadi:
 
 - Ixtiyoriy: `VITE_TG_LINK` env o'zgaruvchisiga bot Mini App havolasini bersangiz (masalan `https://t.me/YourBot/app`), taklif/chaqiruv havolasi Telegram deep-link (`?startapp=…`) bo'lib, do'st bosishi bilan to'g'ridan-to'g'ri ilovada ochiladi. Berilmasa, veb-URL (`?g=…`) ishlatiladi.
 
+## Jamoaviy intuitsiya (dumaloq stol, 30 kishigacha)
+
+Bosh sahifadagi "Jamoaviy intuitsiya" — bir havola orqali **30 kishigacha** bir "dumaloq stol"ga yig'iladigan guruh rejimi (Supabase kerak):
+
+- Qo'shilganlar hammada dumaloq stol ko'rinishida ko'rinib turadi (Realtime *presence*).
+- Galma-gal har bir ishtirokchiga **10 soniya** "his qilish" navbati beriladi — o'sha payt qolganlar ham meva tanlaydi.
+- Tanlov — **6 ta meva**: 🍎 Olma, 🍌 Banan, 🍇 Uzum, 🍊 Apelsin, 🍓 Qulupnay, 🍉 Tarvuz.
+- Navbat tugagach hammaga o'sha raundda kim qaysi mevani tanlagani ochiladi va **jamoaviy rezonans** (necha kishi navbatdagi odam bilan bir xil his qilgani) ko'rinadi. Shu tartibda barcha ishtirokchi bir marta his qilib chiqadi.
+- Oxirida umumiy rezonans foizi va har navbat bo'yicha natija chiqadi.
+
+Boshlovchi (stol egasi) navbatlarni boshqaradi; ishtirokchilar **taklif havolasi** yoki 5 belgili **kod** bilan qo'shiladi. Havola `VITE_TG_LINK` bo'lsa Telegram deep-link (`?startapp=TM…`), aks holda veb-URL (`?tm=…`) bo'ladi. Bu rejim alohida jadval talab qilmaydi — faqat Realtime kanaldan foydalanadi.
+
 ## Hamjamiyat: onlaynlar, faollar reytingi va chat
 
 Supabase sozlangan bo'lsa uchta jamoaviy imkoniyat yoqiladi:

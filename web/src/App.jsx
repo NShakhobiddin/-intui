@@ -6,6 +6,7 @@ import { CosmosBG, CosmosStatic } from "./cosmos-bg.jsx";
 import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
 import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud, tgStartParam } from "./telegram.js";
 import { parseParam } from "./duo.js";
+import { parseTeamParam } from "./team.js";
 import { communityEnabled, myUid, watchOnline, pushUsage, fetchTopActive } from "./community.js";
 import { WelcomeScreen, NicknameScreen } from "./screens/Onboarding.jsx";
 import { HomeScreen, ModeSelectScreen } from "./screens/Home.jsx";
@@ -13,6 +14,7 @@ import { GameScreen } from "./screens/Game.jsx";
 import { StatsScreen } from "./screens/Stats.jsx";
 import { LeaderboardScreen, ProfileScreen } from "./screens/Extra.jsx";
 import { DuoScreen, AsyncDuo } from "./screens/Duo.jsx";
+import { TeamScreen } from "./screens/Team.jsx";
 
 export default function App() {
   const [state, setState] = React.useState(() => D.loadState());
@@ -21,7 +23,9 @@ export default function App() {
   const [newBadges, setNewBadges] = React.useState([]);
   const [duoCode, setDuoCode] = React.useState(null); // jonli xona kodi (null = xona yaratish)
   const [duoToken, setDuoToken] = React.useState(null); // Telegram async chaqiruv/natija
+  const [teamCode, setTeamCode] = React.useState(null); // jamoaviy stol kodi (null = yangi stol)
   const wantDuo = React.useRef(null); // deep-link orqali kutilayotgan { room } | { token }
+  const wantTeam = React.useRef(null); // deep-link orqali kutilayotgan jamoaviy stol kodi
   const myName = state.nickname || tgName() || "Do'st";
 
   // ---------- hamjamiyat: onlaynlar + faollik soatlari ----------
@@ -68,19 +72,31 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  // Deep-link (Telegram startapp / ?g= / ?room=) orqali duelga qo'shilish
+  // Deep-link (Telegram startapp / ?g= / ?room= / ?tm=) orqali qo'shilish
   React.useEffect(() => {
     let p = tgStartParam();
-    if (!p && typeof location !== "undefined") {
+    let webTeam = "";
+    if (typeof location !== "undefined") {
       try {
         const q = new URLSearchParams(location.search);
-        p = q.get("g") || q.get("room") || "";
+        webTeam = q.get("tm") || "";
+        if (!p) p = q.get("g") || q.get("room") || "";
       } catch (e) { /* ignore */ }
     }
+    // Jamoaviy stol havolasi (TM… deep-link yoki ?tm=) — dueldan oldin tekshiriladi
+    const team = parseTeamParam(webTeam) || parseTeamParam(p);
+    if (team) { wantTeam.current = team; return; }
     const parsed = parseParam(p);
     if (parsed) wantDuo.current = parsed;
   }, []);
   React.useEffect(() => {
+    if (wantTeam.current && state.onboarded && screen !== "team") {
+      const c = wantTeam.current;
+      wantTeam.current = null;
+      setTeamCode(c);
+      setScreen("team");
+      return;
+    }
     if (wantDuo.current && state.onboarded && screen !== "duo") {
       const w = wantDuo.current;
       wantDuo.current = null;
@@ -190,9 +206,9 @@ export default function App() {
   };
 
   // ---------- render ----------
-  const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo";
+  const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo" && screen !== "team";
   // Mashq/o'yin paytida jonli animatsiya o'chadi — asosiy rasm statik ko'rinadi
-  const heavyPlay = screen === "game" || screen === "duo";
+  const heavyPlay = screen === "game" || screen === "duo" || screen === "team";
   // 247 — prototip standart aksenti #8b7cf6 ning hue qiymati
   const appStyle = { "--accent-h": 247, "--speed": 1 };
 
@@ -214,6 +230,7 @@ export default function App() {
             onNav={setScreen}
             onStartDaily={() => setScreen("practice")}
             onPickMode={(m) => startGame(m)}
+            onTeam={() => { setTeamCode(null); setScreen("team"); }}
             onDuo={() => { setDuoCode(null); setDuoToken(null); setScreen("duo"); }} />
         ) : null}
 
@@ -225,6 +242,11 @@ export default function App() {
             <DuoScreen myName={myName} initialCode={duoCode}
               onExit={() => { setDuoCode(null); setScreen("home"); }} />
           )
+        ) : null}
+
+        {screen === "team" ? (
+          <TeamScreen myName={myName} myId={myUid()} initialCode={teamCode}
+            onExit={() => { setTeamCode(null); setScreen("home"); }} />
         ) : null}
 
         {screen === "practice" ? (

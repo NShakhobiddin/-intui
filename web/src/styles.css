@@ -607,3 +607,120 @@ textarea.field { padding: 16px 18px; resize: none; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) {
   .chat-overlay, .chat-sheet { animation: none; }
 }
+
+/* ===== Jamoaviy intuitsiya: dumaloq stol + meva tanlash ===== */
+.team-table {
+  width: min(360px, 86vw);
+  margin: 6px auto 2px;
+  aspect-ratio: 1 / 1;
+  position: relative;
+}
+.team-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, hsla(var(--accent-h), 60%, 40%, 0.10), transparent 62%);
+  box-shadow: inset 0 0 0 1px var(--stroke-soft), inset 0 0 40px hsla(var(--accent-h), 60%, 50%, 0.08);
+}
+.team-seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.team-seat-av { position: relative; display: grid; place-items: center; border-radius: 50%; }
+.team-seat.active .team-seat-av { transform: scale(1.12); }
+.team-seat-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+  max-width: 58px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.team-seat.active .team-seat-name { color: var(--accent); }
+.team-seat-glow {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 14px hsla(var(--accent-h), 88%, 70%, 0.6);
+  animation: team-pulse calc(1.6s / var(--speed)) ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes team-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+.team-seat-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--good);
+  border: 2px solid var(--bg-1);
+  box-shadow: 0 0 6px var(--good);
+}
+.team-seat-fruit {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(6, 5, 14, 0.72);
+  animation: pop-in calc(0.35s / var(--speed)) cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.team-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: radial-gradient(circle, hsla(var(--accent-h), 60%, 45%, 0.18), transparent 72%);
+}
+.team-count {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.team-center-sub { font-size: 12px; font-weight: 600; color: var(--muted); line-height: 1.3; margin-top: 3px; }
+
+.fruit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.fruit-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 11px 4px 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05); /* zaxira (color-mix bo'lmasa) */
+  border: 1.5px solid var(--stroke);
+  background: color-mix(in srgb, var(--fru) 14%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--fru) 45%, transparent);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+.fruit-btn:active { transform: scale(0.95); }
+.fruit-btn:hover { box-shadow: 0 0 18px color-mix(in srgb, var(--fru) 35%, transparent); }
+.fruit-emoji { font-size: 30px; line-height: 1; }
+.fruit-label { font-size: 12.5px; font-weight: 700; color: var(--text); }
