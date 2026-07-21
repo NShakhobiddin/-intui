@@ -139,6 +139,8 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
   })();
   const lastResult = results[results.length - 1];
   const fmtT = (s) => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  const chance = Math.round(100 / nOptions);
+  const liveStats = <LiveStats acc={acc} correct={correctN} done={results.length} chance={chance} streak={sessStreak} time={fmtT(elapsed)} />;
 
   // ---------- phases ----------
   if (phase === "mood") {
@@ -181,7 +183,8 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
   const showCards = phase === "pick" || phase === "second" || phase === "reveal";
 
   return (
-    <GameShell mode={mode} attempt={attempt + 1} total={TOTAL} onExit={handleExit} onFinish={phase !== "summary" && results.length ? handleExit : null}>
+    <GameShell mode={mode} attempt={attempt + 1} total={TOTAL} onExit={handleExit} onFinish={phase !== "summary" && results.length ? handleExit : null}
+      statsBar={phase !== "summary" ? liveStats : null}>
       {phase === "focus" ? (
         <div style={{ textAlign: "center", marginTop: 6 }}>
           <p style={{ fontSize: 16.5, color: "var(--muted)" }}>
@@ -271,7 +274,41 @@ function MiniStat({ icon, label, value, sub, divider }) {
   );
 }
 
-function GameShell({ mode, attempt, total, onExit, onFinish, children }) {
+/* O'yin davomida doimiy ko'rinadigan jonli statistika (yakunlamasdan ham) */
+function LiveStats({ acc, correct, done, chance, streak, time }) {
+  const diff = done ? acc - chance : 0;
+  const Sep = () => <div style={{ width: 1, alignSelf: "stretch", background: "var(--stroke-soft)", margin: "3px 0" }}></div>;
+  const cellStyle = { flex: 1, textAlign: "center", minWidth: 0 };
+  const numStyle = { fontWeight: 800, fontSize: 16, lineHeight: 1.1 };
+  return (
+    <div className="panel" style={{ marginTop: 10, padding: "9px 6px", display: "flex", alignItems: "center" }}>
+      <div style={cellStyle}>
+        <div style={numStyle}>
+          {done ? acc + "%" : "—"}
+          {done && diff !== 0 ? <span style={{ fontSize: 11, fontWeight: 700, color: diff > 0 ? "var(--good)" : "var(--bad)", marginLeft: 3 }}>{diff > 0 ? "+" : ""}{diff}</span> : null}
+        </div>
+        <div className="t-micro" style={{ fontSize: 10.5 }}>aniqlik</div>
+      </div>
+      <Sep />
+      <div style={cellStyle}>
+        <div style={numStyle}>{correct}/{done}</div>
+        <div className="t-micro" style={{ fontSize: 10.5 }}>to'g'ri</div>
+      </div>
+      <Sep />
+      <div style={cellStyle}>
+        <div style={{ ...numStyle, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}><Ic name="fire" size={13} color="#f59e0b" />{streak}</div>
+        <div className="t-micro" style={{ fontSize: 10.5 }}>streak</div>
+      </div>
+      <Sep />
+      <div style={cellStyle}>
+        <div style={numStyle}>{time}</div>
+        <div className="t-micro" style={{ fontSize: 10.5 }}>vaqt</div>
+      </div>
+    </div>
+  );
+}
+
+function GameShell({ mode, attempt, total, onExit, onFinish, statsBar, children }) {
   return (
     <div className="screen" data-screen-label={"O'yin — " + mode.name}>
       <div className="screen-pad-nonav" style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
@@ -288,6 +325,7 @@ function GameShell({ mode, attempt, total, onExit, onFinish, children }) {
         {attempt ? (
           <div className="hbar" style={{ height: 4, marginTop: 14 }}><i style={{ width: (attempt / total) * 100 + "%" }}></i></div>
         ) : null}
+        {statsBar}
         <div style={{ marginTop: attempt ? 8 : 18, display: "flex", flexDirection: "column", flex: 1 }}>{children}</div>
         {attempt && onFinish ? (
           <button className="btn-ghost" style={{ marginTop: 14 }} onClick={onFinish}>
