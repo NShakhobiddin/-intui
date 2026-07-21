@@ -23,7 +23,25 @@ function moodInfo(id) {
   return D.MOODS.find((m) => m.id === id) || null;
 }
 
-export function LeaderboardScreen({ state, stats }) {
+function fmtDur(sec) {
+  const m = Math.round((sec || 0) / 60);
+  if (m < 60) return m + " daq";
+  const h = Math.floor(m / 60), mm = m % 60;
+  return h + " s" + (mm ? " " + mm + " daq" : "");
+}
+
+export function LeaderboardScreen({ state, stats, community, meId, myName, online = [], fetchTopActive }) {
+  const [tab, setTab] = React.useState("records");
+  const [active, setActive] = React.useState(null); // null = yuklanmoqda
+
+  React.useEffect(() => {
+    if (tab !== "active" || !community || !fetchTopActive) return;
+    let ok = true;
+    setActive(null);
+    fetchTopActive(25).then((r) => { if (ok) setActive(r); }).catch(() => { if (ok) setActive([]); });
+    return () => { ok = false; };
+  }, [tab, community]);
+
   const ranked = (state.sessions || [])
     .map((s) => ({ ...s, acc: s.total ? Math.round((s.correct / s.total) * 100) : 0 }))
     .sort((a, b) => b.acc - a.acc || b.total - a.total || (a.date < b.date ? 1 : -1))
@@ -34,24 +52,73 @@ export function LeaderboardScreen({ state, stats }) {
   const bestMood = best ? moodInfo(best.mood) : null;
 
   return (
-    <div className="screen" data-screen-label="Eng yaxshi natijalar">
+    <div className="screen" data-screen-label="Reyting">
       <div className="screen-pad">
         <div style={{ textAlign: "center", marginTop: 4 }}>
           <div style={{ display: "flex", justifyContent: "center" }}><Logo size={50} /></div>
-          <h1 className="t-title" style={{ marginTop: 8 }}>Eng yaxshi natijalar</h1>
-          <p className="t-sub" style={{ marginTop: 3 }}>Shaxsiy rekordlaringiz — qachon va qanday holatda</p>
+          <h1 className="t-title" style={{ marginTop: 8 }}>Reyting</h1>
+          <p className="t-sub" style={{ marginTop: 3 }}>Rekordlaringiz, onlaynlar va eng faollar</p>
         </div>
 
-        {!best ? (
-          <div className="panel" style={{ marginTop: 26, padding: "34px 22px", textAlign: "center" }}>
+        {community ? (
+          <div className="seg" style={{ marginTop: 18 }}>
+            {[["records", "Rekordlar"], ["online", "Onlayn" + (online.length ? " " + online.length : "")], ["active", "Faollar"]].map(([id, lbl]) => (
+              <button key={id} className={tab === id ? "on" : ""} onClick={() => setTab(id)} style={{ fontSize: 13.5 }}>{lbl}</button>
+            ))}
+          </div>
+        ) : null}
+
+        {tab === "online" && community ? (
+          <div style={{ marginTop: 16 }}>
+            <div className="panel" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12, border: "1px solid hsla(140,70%,55%,0.3)" }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--good)", boxShadow: "0 0 10px var(--good)", flex: "none" }}></span>
+              <div style={{ fontWeight: 800, fontSize: 18 }}>{online.length}</div>
+              <div className="t-sub" style={{ fontSize: 14 }}>kishi hozir onlayn</div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
+              {online.map((u) => (
+                <div key={u.id} className="panel" style={{ padding: "11px 15px", display: "flex", alignItems: "center", gap: 11, background: u.id === meId ? "var(--card-2)" : "var(--card)" }}>
+                  <Avatar nick={u.name || "?"} size={36} me={u.id === meId} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.id === meId ? "Siz" : (u.name || "Anonim")}</div>
+                    <div className="t-micro" style={{ display: "flex", alignItems: "center", gap: 5 }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--good)" }}></span>onlayn · {fmtDur(u.sec)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : tab === "active" && community ? (
+          <div style={{ marginTop: 16 }}>
+            {active === null ? (
+              <div className="panel" style={{ padding: 24, textAlign: "center" }}><p className="t-sub" style={{ fontSize: 14 }}>Yuklanmoqda…</p></div>
+            ) : active.length === 0 ? (
+              <div className="panel" style={{ padding: 24, textAlign: "center" }}><p className="t-sub" style={{ fontSize: 14 }}>Hozircha ma'lumot yo'q — biroz o'ynagach reyting to'ladi.</p></div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {active.map((u, i) => (
+                  <div key={u.id} className="panel" style={{ padding: "11px 15px", display: "flex", alignItems: "center", gap: 11, background: u.id === meId ? "var(--card-2)" : "var(--card)", border: u.id === meId ? "1px solid hsla(var(--accent-h),88%,74%,0.4)" : "1px solid var(--stroke-soft)" }}>
+                    <span style={{ width: 24, textAlign: "center", fontWeight: 800, fontSize: 15, flex: "none", color: i < 3 ? "var(--accent)" : "var(--faint)" }}>{i + 1}</span>
+                    <Avatar nick={u.name || "?"} size={36} me={u.id === meId} />
+                    <div style={{ flex: 1, minWidth: 0, fontWeight: 700, fontSize: 15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.id === meId ? "Siz" : (u.name || "Anonim")}</div>
+                    <div style={{ textAlign: "right", flex: "none" }}>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: "var(--accent)" }}>{fmtDur(u.total_sec)}</div>
+                      <div className="t-micro">mashq</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          !best ? (
+          <div className="panel" style={{ marginTop: 20, padding: "34px 22px", textAlign: "center" }}>
             <div style={{ display: "flex", justifyContent: "center" }}><ImgIcon name="trophy" size={64} round={true} /></div>
             <div style={{ fontWeight: 700, fontSize: 17, marginTop: 12 }}>Hozircha natijalar yo'q</div>
             <p className="t-sub" style={{ marginTop: 6, fontSize: 14 }}>Birinchi sessiyani yakunlang — eng yaxshi natijangiz shu yerda ko'rinadi.</p>
           </div>
         ) : (
           <React.Fragment>
-            {/* Eng yaxshi natija */}
-            <div className="panel" style={{ marginTop: 22, padding: "20px 18px", border: "1px solid hsla(var(--accent-h),88%,74%,0.35)", background: "var(--card-2)", boxShadow: "0 0 30px hsla(var(--accent-h),88%,70%,0.12)" }}>
+            <div className="panel" style={{ marginTop: 16, padding: "20px 18px", border: "1px solid hsla(var(--accent-h),88%,74%,0.35)", background: "var(--card-2)", boxShadow: "0 0 30px hsla(var(--accent-h),88%,70%,0.12)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
                 <Ring size={104} stroke={9} value={best.acc} max={100}>
                   <div>
@@ -76,8 +143,6 @@ export function LeaderboardScreen({ state, stats }) {
                 {bestMood ? <span className="pill" style={{ fontSize: 12.5 }}><MoodIcon mood={bestMood} size={14} />{bestMood.label}</span> : null}
               </div>
             </div>
-
-            {/* Qolgan rekordlar */}
             {rest.length ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 16 }}>
                 {rest.map((r, i) => {
@@ -105,12 +170,11 @@ export function LeaderboardScreen({ state, stats }) {
               </div>
             ) : null}
           </React.Fragment>
-        )}
+        ))}
       </div>
     </div>
   );
 }
-
 export function Avatar({ nick, size = 48, me, crown }) {
   const hue = me ? "var(--accent-h)" : String((hashStr(nick) % 360));
   return (

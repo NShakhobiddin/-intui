@@ -113,12 +113,18 @@ export function DuoScreen({ myName, initialCode, onExit }) {
   const [asyncCompose, setAsyncCompose] = React.useState(false);
   const [chanStatus, setChanStatus] = React.useState(""); // SUBSCRIBED | TIMED_OUT | CHANNEL_ERROR | CLOSED
   const [slow, setSlow] = React.useState(false); // ulanish/kutish cho'zilib ketdi
+  // Suhbat (chat) — jonli kanal orqali
+  const [messages, setMessages] = React.useState([]);
+  const [chatOpen, setChatOpen] = React.useState(false);
+  const [chatDraft, setChatDraft] = React.useState("");
+  const [unread, setUnread] = React.useState(0);
+  const chatListRef = React.useRef(null);
 
   const conn = React.useRef(null);
   const scoredRound = React.useRef(-1);
   const startedRef = React.useRef(false);
   const S = React.useRef({});
-  S.current = { round, secret, isHost, mode, view };
+  S.current = { round, secret, isHost, mode, view, chatOpen };
 
   const friend = roster.find((m) => m.host !== isHost) || null;
   const bothHere = roster.length >= 2;
@@ -167,6 +173,11 @@ export function DuoScreen({ myName, initialCode, onExit }) {
           if (S.current.isHost && startedRef.current && conn.current) {
             conn.current.send({ t: "round", round: S.current.round < 0 ? 0 : S.current.round, mode: S.current.mode });
           }
+          return;
+        }
+        if (p.t === "chat") {
+          setMessages((prev) => [...prev, { mine: false, name: p.name || "Do'st", text: p.text, ts: p.ts }].slice(-60));
+          if (!S.current.chatOpen) setUnread((u) => Math.min(u + 1, 99));
           return;
         }
         if (p.round !== S.current.round) return;
@@ -262,6 +273,20 @@ export function DuoScreen({ myName, initialCode, onExit }) {
     applyRound(r, mode);
   };
   const exit = () => { if (conn.current) { conn.current.leave(); conn.current = null; } onExit(); };
+
+  // ---------- Suhbat ----------
+  const sendChat = () => {
+    const t = chatDraft.trim().slice(0, 240);
+    if (!t || !conn.current) return;
+    const ts = Date.now();
+    conn.current.send({ t: "chat", name: myName, text: t, ts });
+    setMessages((prev) => [...prev, { mine: true, name: myName, text: t, ts }].slice(-60));
+    setChatDraft("");
+  };
+  const openChat = () => { setChatOpen(true); setUnread(0); };
+  React.useEffect(() => {
+    if (chatOpen && chatListRef.current) chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+  }, [messages, chatOpen]);
 
   // ---------- Supabase yo'q yoki async tanlangan: Telegram orqali navbatli ----------
   if (asyncCompose || (!duoAvailable && !initialCode)) {
@@ -411,8 +436,14 @@ export function DuoScreen({ myName, initialCode, onExit }) {
   // ---------- O'yin ----------
   const modeName = (DUO_MODES.find((m) => m.id === mode) || DUO_MODES[0]).name;
   const secretCard = reveal ? options[reveal.secret] : (secret !== null ? options[secret] : null);
+  const chatFab = (
+    <button className="chat-fab" onClick={openChat} aria-label="Suhbat">
+      <Ic name="chat" size={20} color="var(--accent)" />
+      {unread > 0 ? <span className="dot">{unread > 9 ? "9+" : unread}</span> : null}
+    </button>
+  );
   return (
-    <Shell onExit={exit} title={modeName + " · duel"}>
+    <Shell onExit={exit} title={modeName + " · duel"} headerRight={chatFab}>
       {/* O'yinchilar */}
       <div className="panel" style={{ padding: "12px 14px", display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
         <PlayerBadge name={myName} me active={iAmChooser} role={iAmChooser ? "tanlaydi" : "sezadi"} />
@@ -481,6 +512,8 @@ export function DuoScreen({ myName, initialCode, onExit }) {
           )
         )}
       </div>
+      <ChatSheet open={chatOpen} messages={messages} draft={chatDraft} setDraft={setChatDraft}
+        onSend={sendChat} onClose={() => setChatOpen(false)} listRef={chatListRef} />
     </Shell>
   );
 }
@@ -504,15 +537,52 @@ function ModeGlyph({ id }) {
   return <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>{["#ff3b52", "#2f7bff", "#18c26a", "#ffc21e"].map((c) => <span key={c} style={{ width: 12, height: 12, borderRadius: 4, background: c }}></span>)}</div>;
 }
 
-function Shell({ onExit, title, children }) {
+function Shell({ onExit, title, children, headerRight }) {
   return (
     <div className="screen" data-screen-label={"Duo — " + title}>
       <div className="screen-pad-nonav" style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <BackBtn onClick={onExit} />
           <span style={{ fontSize: 18, fontWeight: 700 }}>{title}</span>
+          {headerRight ? <div style={{ marginLeft: "auto" }}>{headerRight}</div> : null}
         </div>
         <div style={{ marginTop: 16, display: "flex", flexDirection: "column", flex: 1 }}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* Suhbat oynasi (pastdan chiqadigan varaq) */
+function ChatSheet({ open, messages, draft, setDraft, onSend, onClose, listRef }) {
+  if (!open) return null;
+  return (
+    <div className="chat-overlay" onClick={onClose}>
+      <div className="chat-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="chat-head">
+          <span style={{ fontWeight: 800, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <Ic name="chat" size={19} color="var(--accent)" /> Suhbat
+          </span>
+          <button onClick={onClose} aria-label="Yopish" style={{ width: 34, height: 34, display: "grid", placeItems: "center", borderRadius: 10, background: "var(--card)" }}>
+            <Ic name="close" size={18} color="var(--muted)" />
+          </button>
+        </div>
+        <div className="chat-list" ref={listRef}>
+          {messages.length === 0 ? (
+            <div className="chat-empty">Hali xabar yo'q — birinchi bo'lib yozing 💬</div>
+          ) : messages.map((m, i) => (
+            <div key={i} className={"chat-msg " + (m.mine ? "me" : "them")}>
+              {!m.mine ? <div className="who">{m.name || "Do'st"}</div> : null}
+              {m.text}
+            </div>
+          ))}
+        </div>
+        <form className="chat-input-row" onSubmit={(e) => { e.preventDefault(); onSend(); }}>
+          <input className="field" value={draft} maxLength={240} placeholder="Xabar yozing…"
+            onChange={(e) => setDraft(e.target.value)} autoFocus />
+          <button type="submit" className="chat-send" disabled={!draft.trim()} aria-label="Yuborish">
+            <Ic name="send" size={20} color="currentColor" />
+          </button>
+        </form>
       </div>
     </div>
   );

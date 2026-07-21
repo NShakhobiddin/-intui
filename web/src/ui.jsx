@@ -102,7 +102,13 @@ export function Ic({ name, size = 22, color = "currentColor", style }) {
       <g transform="translate(12 10.9) scale(0.42) translate(-12 -12)">
         <path d="M12 3.5c.6 4 2.5 7.9 8.5 8.5-6 .6-7.9 4.5-8.5 8.5-.6-4-2.5-7.9-8.5-8.5 6-.6 7.9-4.5 8.5-8.5Z" fill={color} />
       </g>
-    </g>
+    </g>,
+
+    chat:
+    <g>{P("M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6A2.5 2.5 0 0 1 16.5 15H9l-4 3.8V6.5Z")}{P("M8.5 8.3h7M8.5 11h4.5")}</g>,
+
+    send:
+    <g>{P("M4.5 11.7 20 4.5l-6.4 15-2.9-6.1-6.2-1.7Z")}{P("M11 12.9 15.5 7.5")}</g>,
 
   };
   return (

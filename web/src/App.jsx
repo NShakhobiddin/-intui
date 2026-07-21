@@ -6,6 +6,7 @@ import { CosmosBG, CosmosStatic } from "./cosmos-bg.jsx";
 import { cloudEnabled, supabase, fetchCloudState, pushCloudState, authErrorText } from "./cloud.js";
 import { tgName, tgCloudAvailable, loadTgCloud, saveTgCloud, tgStartParam } from "./telegram.js";
 import { parseParam } from "./duo.js";
+import { communityEnabled, myUid, watchOnline, pushUsage, fetchTopActive } from "./community.js";
 import { WelcomeScreen, NicknameScreen } from "./screens/Onboarding.jsx";
 import { HomeScreen, ModeSelectScreen } from "./screens/Home.jsx";
 import { GameScreen } from "./screens/Game.jsx";
@@ -22,6 +23,20 @@ export default function App() {
   const [duoToken, setDuoToken] = React.useState(null); // Telegram async chaqiruv/natija
   const wantDuo = React.useRef(null); // deep-link orqali kutilayotgan { room } | { token }
   const myName = state.nickname || tgName() || "Do'st";
+
+  // ---------- hamjamiyat: onlaynlar + faollik soatlari ----------
+  const totalSec = React.useMemo(() => (state.sessions || []).reduce((t, s) => t + (s.sec || 0), 0), [state.sessions]);
+  const [onlineList, setOnlineList] = React.useState([]);
+  const onlineRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!communityEnabled) return;
+    onlineRef.current = watchOnline({ id: myUid(), name: myName, sec: totalSec }, setOnlineList);
+    return () => { if (onlineRef.current) onlineRef.current.stop(); onlineRef.current = null; };
+  }, []);
+  React.useEffect(() => {
+    if (onlineRef.current) onlineRef.current.update({ name: myName, sec: totalSec });
+    if (communityEnabled) pushUsage({ id: myUid(), name: myName, sec: totalSec });
+  }, [myName, totalSec]);
 
   // ---------- bulut sinxronlash ----------
   const [cloudUser, setCloudUser] = React.useState(null);
@@ -217,7 +232,11 @@ export default function App() {
         ) : null}
 
         {screen === "stats" ? <StatsScreen state={stateView} demoMerged={attempts} /> : null}
-        {screen === "leaderboard" ? <LeaderboardScreen state={stateView} stats={stats} /> : null}
+        {screen === "leaderboard" ? (
+          <LeaderboardScreen state={stateView} stats={stats}
+            community={communityEnabled} meId={myUid()} myName={myName}
+            online={onlineList} fetchTopActive={fetchTopActive} />
+        ) : null}
         {screen === "profile" ? (
           <ProfileScreen state={stateView} stats={stats} cloud={cloud}
             onRename={(n) => save(Object.assign({}, state, { nickname: n }))}
