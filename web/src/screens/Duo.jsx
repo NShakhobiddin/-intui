@@ -28,14 +28,14 @@ function DuoFace({ mode, card }) {
   if (mode === "shape") {
     return (
       <div className="gcard-inner face-back" style={{ borderRadius: "inherit", flexDirection: "column", gap: 10, background: "#ffffff" }}>
-        <ShapeGlyph shape={card.shape} size={66} color="#241f3d" />
+        <ShapeGlyph shape={card.shape} size={82} color="#241f3d" />
         <span style={{ fontSize: 15, fontWeight: 700, color: "#3f3a63" }}>{card.label}</span>
       </div>
     );
   }
   return (
     <div className="gcard-inner face-back" style={{ borderRadius: "inherit", background: faceColor(card) }}>
-      <span style={{ fontWeight: 800, fontSize: 30, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
+      <span style={{ fontWeight: 800, fontSize: 38, color: card.text, letterSpacing: 0.5 }}>{card.label}</span>
     </div>
   );
 }
@@ -46,7 +46,7 @@ function DuoCard({ mode, card, open, tone }) {
   if (tone === "win") cls.push("win");
   if (tone === "lose") cls.push("lose");
   return (
-    <div className="flip-wrap" style={{ width: 168 }}>
+    <div className="flip-wrap" style={{ width: 210 }}>
       <div className={cls.join(" ")} style={{ width: "100%", display: "block" }}>
         <div className={"flipper" + (open ? " flipped" : "")}>
           <CardBack />
