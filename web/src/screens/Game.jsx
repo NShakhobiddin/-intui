@@ -427,63 +427,80 @@ function SingleCard({ mode, options, secret, pick, phase, onPick }) {
 
 /* ---------- Card back ---------- */
 
-/* Karta orqasi — qora-oq gipnoz spiral (yuborilgan dizaynga moslab). */
+/* Karta orqasi — minimal abstract mandala, chetida tilla hoshiya. */
 const CBX = 100, CBY = 152; // viewBox 200 x 304
-const CB_WHITE = "#f2efe6";
-const CB_BLACK = "#0b0b0b";
+const CB_GOLD = "#d8b46a";
+const CB_GOLD_HI = "#f2e0a8";
 
-// markaziy gipnoz spiral yo'li (bir marta hisoblanadi)
-const SPIRAL_PATH = (() => {
-  const R = 86, turns = 5, T = turns * 2 * Math.PI, steps = turns * 90, half = R / (2 * turns);
-  const pt = (th, r) => [CBX + r * Math.cos(th), CBY + r * Math.sin(th)];
-  const out = [], inn = [];
-  for (let i = 0; i <= steps; i++) { const th = T * i / steps; out.push(pt(th, R * (1 - i / steps))); }
-  for (let i = steps; i >= 0; i--) { const th = T * i / steps; inn.push(pt(th, Math.max(0, R * (1 - i / steps) - half))); }
-  return "M " + out.concat(inn).map((p) => p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" L ") + " Z";
+const cbP = (r, th) => [CBX + r * Math.cos(th), CBY + r * Math.sin(th)];
+const cbF = (pt) => pt[0].toFixed(2) + " " + pt[1].toFixed(2);
+// yaproqsimon (petal) yo'l — markazdan tashqariga cho'zilgan uchli barg
+function cbPetal(a, r0, r1, spread) {
+  const base = cbP(r0, a), tip = cbP(r1, a), mid = (r0 + r1) / 2;
+  const c1 = cbP(mid, a - spread), c2 = cbP(mid, a + spread);
+  return `M ${cbF(base)} Q ${cbF(c1)} ${cbF(tip)} Q ${cbF(c2)} ${cbF(base)} Z`;
+}
+// markaziy 8 qirrali yulduz
+const CB_STAR8 = (() => {
+  const R = 12, r = 4.6, n = 8;
+  let d = "";
+  for (let i = 0; i < 2 * n; i++) {
+    const rad = i % 2 === 0 ? R : r, a = (Math.PI * i) / n - Math.PI / 2;
+    d += (i === 0 ? "M " : "L ") + cbF(cbP(rad, a)) + " ";
+  }
+  return d + "Z";
 })();
 
-function cbBurst(cx, cy, r, n, ln) {
-  return Array.from({ length: n }, (_, k) => {
-    const a = 2 * Math.PI * k / n;
-    return { k, x1: cx + r * Math.cos(a), y1: cy + r * Math.sin(a), x2: cx + (r + ln) * Math.cos(a), y2: cy + (r + ln) * Math.sin(a) };
-  });
-}
-function cbStar4(cx, cy, rad) {
-  const q = rad * 0.32;
-  return `M ${cx} ${cy - rad} L ${cx + q} ${cy - q} L ${cx + rad} ${cy} L ${cx + q} ${cy + q} L ${cx} ${cy + rad} L ${cx - q} ${cy + q} L ${cx - rad} ${cy} L ${cx - q} ${cy - q} Z`;
-}
-
 export function CardBack() {
-  const rays = Array.from({ length: 72 }, (_, k) => (2 * Math.PI * k) / 72);
-  const corners = [[30, 34], [170, 34], [30, 270], [170, 270]];
-  const edges = [[100, 28], [100, 276], [14, 152], [186, 152]];
+  const outer = Array.from({ length: 12 }, (_, k) => (2 * Math.PI * k) / 12);
+  const inner = Array.from({ length: 12 }, (_, k) => (2 * Math.PI * (k + 0.5)) / 12);
+  const rays = Array.from({ length: 24 }, (_, k) => (2 * Math.PI * k) / 24);
+  const dots = Array.from({ length: 24 }, (_, k) => cbP(84, (2 * Math.PI * k) / 24));
+  const diamonds = [[100, 40], [100, 264]];
   return (
-    <div className="gcard-inner" style={{ borderRadius: "inherit", overflow: "hidden", background: CB_BLACK }}>
+    <div className="gcard-inner" style={{ borderRadius: "inherit", overflow: "hidden", background: "#0e0b1e" }}>
       <svg viewBox="0 0 200 304" preserveAspectRatio="xMidYMid slice"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden="true">
-        <rect width="200" height="304" fill={CB_BLACK} />
-        <path d={SPIRAL_PATH} fill={CB_WHITE} />
-        <circle cx={CBX} cy={CBY} r="90" fill="none" stroke={CB_WHITE} strokeWidth="1" />
-        <circle cx={CBX} cy={CBY} r="103" fill="none" stroke={CB_WHITE} strokeWidth="0.6" strokeDasharray="1 4" />
-        <g stroke={CB_WHITE} strokeWidth="0.5" strokeOpacity="0.85">
+        <defs>
+          <linearGradient id="cbgold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f6e6ab" />
+            <stop offset="0.5" stopColor="#d8b46a" />
+            <stop offset="1" stopColor="#a97f36" />
+          </linearGradient>
+          <radialGradient id="cbbg" cx="0.5" cy="0.5" r="0.72">
+            <stop offset="0" stopColor="#1a1533" />
+            <stop offset="1" stopColor="#0a0816" />
+          </radialGradient>
+        </defs>
+        <rect width="200" height="304" fill="url(#cbbg)" />
+        {/* Tilla hoshiya (border) */}
+        <rect x="7" y="7" width="186" height="290" rx="16" fill="none" stroke="url(#cbgold)" strokeWidth="3" />
+        <rect x="12.5" y="12.5" width="175" height="279" rx="12" fill="none" stroke={CB_GOLD} strokeWidth="0.8" strokeOpacity="0.55" />
+        {/* Tashqi nozik halqa + nuqtalar */}
+        <circle cx={CBX} cy={CBY} r="84" fill="none" stroke={CB_GOLD} strokeWidth="0.6" strokeOpacity="0.5" />
+        {dots.map((d, i) => <circle key={i} cx={d[0]} cy={d[1]} r="1" fill={CB_GOLD} fillOpacity="0.8" />)}
+        {/* Nozik nurlar */}
+        <g stroke={CB_GOLD} strokeWidth="0.4" strokeOpacity="0.3">
           {rays.map((a, i) => (
-            <line key={i} x1={CBX + 92 * Math.cos(a)} y1={CBY + 92 * Math.sin(a)} x2={CBX + 100 * Math.cos(a)} y2={CBY + 100 * Math.sin(a)} />
+            <line key={i} x1={cbP(58, a)[0]} y1={cbP(58, a)[1]} x2={cbP(76, a)[0]} y2={cbP(76, a)[1]} />
           ))}
         </g>
-        <rect x="6" y="6" width="188" height="292" rx="16" fill="none" stroke={CB_WHITE} strokeWidth="2" />
-        <rect x="11" y="11" width="178" height="282" rx="12" fill="none" stroke={CB_WHITE} strokeWidth="0.7" />
-        {corners.map(([cx, cy], i) => (
-          <g key={"c" + i}>
-            <circle cx={cx} cy={cy} r="15" fill={CB_BLACK} stroke={CB_WHITE} strokeWidth="1" />
-            {cbBurst(cx, cy, 2, 16, 11).map((b) => <line key={b.k} x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} stroke={CB_WHITE} strokeWidth="0.8" />)}
-            <circle cx={cx} cy={cy} r="2" fill={CB_WHITE} />
-          </g>
-        ))}
-        {edges.map(([cx, cy], i) => (
-          <g key={"e" + i}>
-            <circle cx={cx} cy={cy} r="9" fill={CB_BLACK} stroke={CB_WHITE} strokeWidth="1" />
-            <path d={cbStar4(cx, cy, 5)} fill={CB_WHITE} />
-          </g>
+        {/* Tashqi gulbarglar */}
+        <g fill="none" stroke="url(#cbgold)" strokeWidth="1">
+          {outer.map((a, i) => <path key={i} d={cbPetal(a, 42, 80, 0.13)} />)}
+        </g>
+        {/* Ichki gulbarglar */}
+        <g fill={CB_GOLD} fillOpacity="0.12" stroke={CB_GOLD} strokeWidth="0.9">
+          {inner.map((a, i) => <path key={i} d={cbPetal(a, 18, 50, 0.18)} />)}
+        </g>
+        {/* Markaz */}
+        <circle cx={CBX} cy={CBY} r="30" fill="none" stroke={CB_GOLD} strokeWidth="0.7" strokeOpacity="0.6" />
+        <circle cx={CBX} cy={CBY} r="15" fill="none" stroke="url(#cbgold)" strokeWidth="1.2" />
+        <path d={CB_STAR8} fill="url(#cbgold)" />
+        <circle cx={CBX} cy={CBY} r="2.6" fill={CB_GOLD_HI} />
+        {/* Yuqori/past tilla romblar */}
+        {diamonds.map(([cx, cy], i) => (
+          <path key={i} d={`M ${cx} ${cy - 7} L ${cx + 5} ${cy} L ${cx} ${cy + 7} L ${cx - 5} ${cy} Z`} fill={CB_GOLD} fillOpacity="0.9" />
         ))}
       </svg>
     </div>

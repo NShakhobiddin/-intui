@@ -6,6 +6,7 @@ import React from "react";
 import { Ic, Logo, BackBtn, GlowButton } from "../ui.jsx";
 import { teamAvailable, joinTeam, makeTeamCode, normalizeTeamCode, teamInviteUrl, TEAM_MAX } from "../team.js";
 import { shareInvite, haptic } from "../telegram.js";
+import { ChatSheet } from "./Duo.jsx";
 
 export const FRUITS = [
   { id: "olma", label: "Olma", emoji: "🍎", color: "#ff4d4d" },
@@ -39,6 +40,12 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
   const [scores, setScores] = React.useState({}); // {round: {activeId, activeName, target, aligned, choosers}}
   const [shareMsg, setShareMsg] = React.useState("");
   const [chanStatus, setChanStatus] = React.useState("");
+  // Suhbat (chat)
+  const [messages, setMessages] = React.useState([]);
+  const [chatOpen, setChatOpen] = React.useState(false);
+  const [chatDraft, setChatDraft] = React.useState("");
+  const [unread, setUnread] = React.useState(0);
+  const chatListRef = React.useRef(null);
 
   const conn = React.useRef(null);
   const startedRef = React.useRef(false);
@@ -48,7 +55,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
   const scoresRef = React.useRef({});
   scoresRef.current = scores;
   const S = React.useRef({});
-  S.current = { round, phase, order, isHost, view, picks };
+  S.current = { round, phase, order, isHost, view, picks, chatOpen };
 
   const active = round >= 0 && order[round] ? order[round] : null;
   const iAmActive = !!active && active.id === myId;
@@ -84,6 +91,11 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
     if (p.t === "done") {
       if (p.scores) { setScores(p.scores); scoresRef.current = p.scores; }
       setView("done");
+      return;
+    }
+    if (p.t === "chat") {
+      setMessages((prev) => [...prev, { mine: false, name: p.name || "Anonim", text: p.text, ts: p.ts }].slice(-80));
+      if (!S.current.chatOpen) setUnread((u) => Math.min(u + 1, 99));
       return;
     }
     if (p.t === "sync-req") {
@@ -217,6 +229,31 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
   };
   const exit = () => { if (conn.current) { conn.current.leave(); conn.current = null; } clearTimeout(hostTimer.current); onExit(); };
 
+  // ---------- Suhbat ----------
+  const sendChat = () => {
+    const t = chatDraft.trim().slice(0, 240);
+    if (!t || !conn.current) return;
+    const ts = Date.now();
+    conn.current.send({ t: "chat", name: myName, text: t, ts });
+    setMessages((prev) => [...prev, { mine: true, name: myName, text: t, ts }].slice(-80));
+    setChatDraft("");
+  };
+  const openChat = () => { setChatOpen(true); setUnread(0); };
+  React.useEffect(() => {
+    if (chatOpen && chatListRef.current) chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+  }, [messages, chatOpen]);
+
+  const chatFab = (
+    <button className="chat-fab" onClick={openChat} aria-label="Suhbat">
+      <Ic name="chat" size={20} color="var(--accent)" />
+      {unread > 0 ? <span className="dot">{unread > 9 ? "9+" : unread}</span> : null}
+    </button>
+  );
+  const chatSheet = (
+    <ChatSheet open={chatOpen} messages={messages} draft={chatDraft} setDraft={setChatDraft}
+      onSend={sendChat} onClose={() => setChatOpen(false)} listRef={chatListRef} />
+  );
+
   // ---------- Supabase yo'q ----------
   if (!teamAvailable) {
     return (
@@ -265,7 +302,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
   if (view === "room") {
     const full = roster.length >= TEAM_MAX;
     return (
-      <Shell onExit={exit} title="Dumaloq stol">
+      <Shell onExit={exit} title="Dumaloq stol" headerRight={chatFab}>
         {isHost ? (
           <div className="panel" style={{ padding: "18px 18px", textAlign: "center" }}>
             <div className="t-label">Stol kodi</div>
@@ -316,6 +353,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
         ) : (
           <Waiting text="Boshlovchi o'yinni boshlashini kuting…" />
         )}
+        {chatSheet}
       </Shell>
     );
   }
@@ -327,7 +365,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
     rows.forEach((r) => { totalAligned += r.aligned; totalChoosers += r.choosers; });
     const resonance = totalChoosers ? Math.round((totalAligned / totalChoosers) * 100) : 0;
     return (
-      <Shell onExit={exit} title="Jamoaviy natija">
+      <Shell onExit={exit} title="Jamoaviy natija" headerRight={chatFab}>
         <div style={{ textAlign: "center", marginTop: 6 }}>
           <div style={{ display: "flex", justifyContent: "center" }}><Logo size={50} /></div>
           <h1 className="t-title" style={{ marginTop: 8 }}>Jamoaviy rezonans</h1>
@@ -358,6 +396,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
         <div style={{ flex: 1, minHeight: 12 }}></div>
         {isHost ? <GlowButton icon="sparkle" onClick={restart}>Yana o'ynash</GlowButton> : null}
         <button className="btn-ghost" style={{ marginTop: 10 }} onClick={exit}>Chiqish</button>
+        {chatSheet}
       </Shell>
     );
   }
@@ -368,7 +407,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
   const roundScore = scores[round];
   const iPicked = myPick !== null;
   return (
-    <Shell onExit={exit} title={"Navbat " + (round + 1) + "/" + order.length}>
+    <Shell onExit={exit} title={"Navbat " + (round + 1) + "/" + order.length} headerRight={chatFab}>
       <div className="team-table">
         <div className="team-ring">
           {roster.map((m, i) => {
@@ -442,6 +481,7 @@ export function TeamScreen({ myName, myId, initialCode, onExit }) {
           </React.Fragment>
         )}
       </div>
+      {chatSheet}
     </Shell>
   );
 }
@@ -468,13 +508,14 @@ function Waiting({ text }) {
   );
 }
 
-function Shell({ onExit, title, children }) {
+function Shell({ onExit, title, children, headerRight }) {
   return (
     <div className="screen" data-screen-label={"Team — " + title}>
       <div className="screen-pad-nonav" style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <BackBtn onClick={onExit} />
           <span style={{ fontSize: 18, fontWeight: 700 }}>{title}</span>
+          {headerRight ? <div style={{ marginLeft: "auto" }}>{headerRight}</div> : null}
         </div>
         <div style={{ marginTop: 16, display: "flex", flexDirection: "column", flex: 1 }}>{children}</div>
       </div>

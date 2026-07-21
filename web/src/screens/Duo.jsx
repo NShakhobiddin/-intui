@@ -552,8 +552,8 @@ function Shell({ onExit, title, children, headerRight }) {
   );
 }
 
-/* Suhbat oynasi (pastdan chiqadigan varaq) */
-function ChatSheet({ open, messages, draft, setDraft, onSend, onClose, listRef }) {
+/* Suhbat oynasi (pastdan chiqadigan varaq) — duel va jamoada ishlatiladi */
+export function ChatSheet({ open, messages, draft, setDraft, onSend, onClose, listRef }) {
   if (!open) return null;
   return (
     <div className="chat-overlay" onClick={onClose}>
