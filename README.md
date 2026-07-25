@@ -65,11 +65,12 @@ Ikki rejim bor va ilova avtomatik moslashadi:
 
 ## Yo'riqnoma (alohida bo'lim)
 
-Bosh sahifadagi "Yo'riqnoma" — sezgini qanday mashq qilish bo'yicha interaktiv qo'llanma. Uch bo'limdan iborat:
+Bosh sahifadagi "Yo'riqnoma" — sezgini qanday mashq qilish bo'yicha interaktiv qo'llanma. To'rt bo'limdan iborat:
 
-- **Asos** — nega sezgi kerak: ma'lumot to'lqini → shubha → xato qilish qo'rquvi → harakatsizlik zanjiri; "sarob yoki voha" masali; diqqat qonuni. Shu yerda kimga hozir tavsiya etilmasligi (ruhiy salomatlik bo'yicha davolanayotganlar va h.k.) va halol o'lchov haqida izoh bor: bitta sessiya hech narsani isbotlamaydi, tasodifdan barqaror yuqori aniqlik — haqiqiy signal.
-- **7 qoida** — tezkor o'rganish metodikasi sezgi mashqiga moslashtirilgan (yig'iladigan kartalar). Har bir qoida ilovaning tegishli imkoniyatiga bog'langan: takror → streak, hissiyot → kayfiyat belgilash, tahlil → statistika.
-- **Amaliyot** — ishlaydigan **nafas (markazlashuv) mashqi** (4 s oling · 4 ushlang · 6 chiqaring, 4 sikl, animatsiyali doira), 5 qadamli mashq halqasi va saqlanadigan kunlik reja (checklist `localStorage`da).
+- **Asos** — metodikaning eng muhim qoidasi: vazifa ko'proq karta topish emas, **to'g'ri javob kelgan paytdagi ichki holatni** ushlab, xato paytidagi holatdan ajrata bilish. Kartalar — asbob, sezgiga ochilgan eshik. Shuningdek: sezgi qaysi uch holatda ishlaydi (kuchli hissiyot / zo'riqish / muntazam mashq — oxirgisi yagona boshqariladigan yo'l), natijaga bog'lanmaslik qoidasi, "sarob yoki voha" masali, xavfsizlik eslatmasi va halol o'lchov izohi.
+- **Mashqlar** — kitobdagi nomlangan mashqlar qadamlari bilan, har biri ilovadagi mos rejimni ishga tushiradi: **Haqiqat/Yolg'on**, **Oldindan ko'rish**, **"Bilish" holati**, **Translyatsiya** (= "Do'st bilan o'ynash" rejimi). Bosqichma-bosqich narvon (oq-qora → ranglar → shakl/raqam → hissiyotlar → manzaralar) va oq-qorada **80–90%** ga chiqmaguncha keyingi bosqichga o'tmaslik sharti. Hayotdagi mashqlar: uydan chiqishdan oldin, transport kutganda, yo'lda, muhim suhbatda.
+- **To'siqlar** — sezgining **5 dushmani** (aql/mantiq, pauza, kuchli istak, hissiyot va eng qattig'i — xato qilish qo'rquvi) hamda mashq qiluvchilarning **3 xatosi** (tizimni tushunmay "yaxshilash", majburlab ishlash, o'ziga ishonmaslik). Har biri uchun yechim beriladi.
+- **Holat** — "sokinlik bu nazorat" tamoyili, ishlaydigan **nafas mashqi** (4 s oling · 4 ushlang · 6 chiqaring, 4 sikl) va interaktiv **hissiyot mayatnigi** (quvonch ↔ tushkunlik ↔ zavq ↔ g'azab → shtil): hissiyotni ataylab tebratib, so'ng to'xtatish orqali neytral holatga kirish. Uch yordamchi (vaqt, joy, holat) va saqlanadigan kunlik reja (`localStorage`).
 
 Manba: Mirzakarim Norbekov, «Опыт дурака 6. Как работает интуиция» (AST, 2021). Bo'limdagi matn — shu metodika asosida yozilgan **original qo'llanma**, kitobdan ko'chirma emas.
 

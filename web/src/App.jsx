@@ -253,7 +253,11 @@ export default function App() {
 
         {screen === "guide" ? (
           <GuideScreen onExit={() => setScreen("home")}
-            onStartPractice={() => setScreen("practice")} />
+            onStartMode={(id) => {
+              const m = D.MODES.find((x) => x.id === id);
+              if (m) startGame(m); else setScreen("practice");
+            }}
+            onDuo={() => { setDuoCode(null); setDuoToken(null); setScreen("duo"); }} />
         ) : null}
 
         {screen === "practice" ? (
