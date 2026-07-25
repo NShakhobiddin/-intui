@@ -63,6 +63,16 @@ Ikki rejim bor va ilova avtomatik moslashadi:
 
 - Ixtiyoriy: `VITE_TG_LINK` env o'zgaruvchisiga bot Mini App havolasini bersangiz (masalan `https://t.me/YourBot/app`), taklif/chaqiruv havolasi Telegram deep-link (`?startapp=…`) bo'lib, do'st bosishi bilan to'g'ridan-to'g'ri ilovada ochiladi. Berilmasa, veb-URL (`?g=…`) ishlatiladi.
 
+## Yo'riqnoma (alohida bo'lim)
+
+Bosh sahifadagi "Yo'riqnoma" — sezgini qanday mashq qilish bo'yicha interaktiv qo'llanma. Uch bo'limdan iborat:
+
+- **Asos** — nega sezgi kerak: ma'lumot to'lqini → shubha → xato qilish qo'rquvi → harakatsizlik zanjiri; "sarob yoki voha" masali; diqqat qonuni. Shu yerda kimga hozir tavsiya etilmasligi (ruhiy salomatlik bo'yicha davolanayotganlar va h.k.) va halol o'lchov haqida izoh bor: bitta sessiya hech narsani isbotlamaydi, tasodifdan barqaror yuqori aniqlik — haqiqiy signal.
+- **7 qoida** — tezkor o'rganish metodikasi sezgi mashqiga moslashtirilgan (yig'iladigan kartalar). Har bir qoida ilovaning tegishli imkoniyatiga bog'langan: takror → streak, hissiyot → kayfiyat belgilash, tahlil → statistika.
+- **Amaliyot** — ishlaydigan **nafas (markazlashuv) mashqi** (4 s oling · 4 ushlang · 6 chiqaring, 4 sikl, animatsiyali doira), 5 qadamli mashq halqasi va saqlanadigan kunlik reja (checklist `localStorage`da).
+
+Manba: Mirzakarim Norbekov, «Опыт дурака 6. Как работает интуиция» (AST, 2021). Bo'limdagi matn — shu metodika asosida yozilgan **original qo'llanma**, kitobdan ko'chirma emas.
+
 ## Jamoaviy intuitsiya (dumaloq stol, 30 kishigacha)
 
 Bosh sahifadagi "Jamoaviy intuitsiya" — bir havola orqali **30 kishigacha** bir "dumaloq stol"ga yig'iladigan guruh rejimi (Supabase kerak):

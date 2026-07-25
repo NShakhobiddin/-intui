@@ -16,7 +16,7 @@ function DuoEntryIcon() {
   );
 }
 
-export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode, onDuo, onTeam }) {
+export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode, onDuo, onTeam, onGuide }) {
   const todayMin = D.minutesOn(state.sessions, D.todayStr());
   const daily = Math.min(100, state.dailyProgress);
   const tip = tips[0];
@@ -53,6 +53,18 @@ export function HomeScreen({ state, stats, tips, onNav, onStartDaily, onPickMode
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: 16 }}>Jamoaviy intuitsiya</div>
             <div className="t-micro" style={{ marginTop: 2 }}>30 kishigacha — dumaloq stol, galma-gal his qilish</div>
+          </div>
+          <Ic name="chevR" size={20} color="var(--faint)" />
+        </button>
+
+        {/* Yo'riqnoma */}
+        <button className="panel row-press" onClick={onGuide} style={{ width: "100%", marginTop: 10, padding: "15px 18px", display: "flex", alignItems: "center", gap: 13, cursor: "pointer", textAlign: "left", border: "1px solid hsla(var(--accent-h),88%,74%,0.3)" }}>
+          <div className="mode-tile" style={{ width: 44, height: 44, borderRadius: 14, flex: "none", display: "grid", placeItems: "center" }}>
+            <Ic name="book" size={23} color="var(--accent)" />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 16 }}>Yo'riqnoma</div>
+            <div className="t-micro" style={{ marginTop: 2 }}>Sezgini qanday mashq qilish — qadamma-qadam</div>
           </div>
           <Ic name="chevR" size={20} color="var(--faint)" />
         </button>

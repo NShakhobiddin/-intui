@@ -15,6 +15,7 @@ import { StatsScreen } from "./screens/Stats.jsx";
 import { LeaderboardScreen, ProfileScreen } from "./screens/Extra.jsx";
 import { DuoScreen, AsyncDuo } from "./screens/Duo.jsx";
 import { TeamScreen } from "./screens/Team.jsx";
+import { GuideScreen } from "./screens/Guide.jsx";
 
 export default function App() {
   const [state, setState] = React.useState(() => D.loadState());
@@ -206,7 +207,7 @@ export default function App() {
   };
 
   // ---------- render ----------
-  const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo" && screen !== "team";
+  const showNav = state.onboarded && screen !== "game" && screen !== "welcome" && screen !== "nickname" && screen !== "duo" && screen !== "team" && screen !== "guide";
   // Mashq/o'yin paytida jonli animatsiya o'chadi — asosiy rasm statik ko'rinadi
   const heavyPlay = screen === "game" || screen === "duo" || screen === "team";
   // 247 — prototip standart aksenti #8b7cf6 ning hue qiymati
@@ -231,6 +232,7 @@ export default function App() {
             onStartDaily={() => setScreen("practice")}
             onPickMode={(m) => startGame(m)}
             onTeam={() => { setTeamCode(null); setScreen("team"); }}
+            onGuide={() => setScreen("guide")}
             onDuo={() => { setDuoCode(null); setDuoToken(null); setScreen("duo"); }} />
         ) : null}
 
@@ -247,6 +249,11 @@ export default function App() {
         {screen === "team" ? (
           <TeamScreen myName={myName} myId={myUid()} initialCode={teamCode}
             onExit={() => { setTeamCode(null); setScreen("home"); }} />
+        ) : null}
+
+        {screen === "guide" ? (
+          <GuideScreen onExit={() => setScreen("home")}
+            onStartPractice={() => setScreen("practice")} />
         ) : null}
 
         {screen === "practice" ? (

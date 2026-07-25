@@ -724,3 +724,255 @@ textarea.field { padding: 16px 18px; resize: none; line-height: 1.5; }
 .fruit-btn:hover { box-shadow: 0 0 18px color-mix(in srgb, var(--fru) 35%, transparent); }
 .fruit-emoji { font-size: 30px; line-height: 1; }
 .fruit-label { font-size: 12.5px; font-weight: 700; color: var(--text); }
+
+/* ===== Yo'riqnoma (Guide) ===== */
+.g-quote {
+  margin: 14px auto 0;
+  max-width: 320px;
+  font-size: 15.5px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--accent);
+  padding: 12px 16px;
+  border-left: 2px solid hsla(var(--accent-h), 88%, 74%, 0.5);
+  background: linear-gradient(90deg, hsla(var(--accent-h), 60%, 50%, 0.10), transparent);
+  border-radius: 0 12px 12px 0;
+  text-align: left;
+}
+.g-quote span {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+.g-sec {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 26px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.g-sec::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--stroke), transparent);
+}
+.g-p { font-size: 14.5px; line-height: 1.62; color: var(--muted); margin-top: 10px; }
+
+/* muammo zanjiri */
+.g-chain { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+.g-chain-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 15px;
+  background: var(--card);
+  border: 1px solid var(--stroke-soft);
+}
+.g-chain-ic {
+  width: 36px; height: 36px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: var(--card-2);
+}
+.g-chain-t { font-size: 14.5px; font-weight: 700; }
+.g-chain-arrow {
+  position: absolute;
+  left: 31px; bottom: -12px;
+  font-size: 13px;
+  color: hsla(var(--accent-h), 88%, 74%, 0.55);
+  z-index: 1;
+  line-height: 1;
+}
+
+/* masal */
+.g-parable {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-radius: var(--r-md);
+  background: var(--card-2);
+  border: 1px solid var(--stroke-soft);
+}
+.g-parable p { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+.g-parable p + p { margin-top: 8px; }
+.g-parable-end {
+  margin-top: 12px !important;
+  padding-top: 12px;
+  border-top: 1px solid var(--stroke-soft);
+  font-weight: 700;
+  color: var(--accent) !important;
+}
+
+/* ogohlantirish */
+.g-note {
+  margin-top: 20px;
+  padding: 15px 17px;
+  border-radius: var(--r-md);
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+.g-note-h {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 800; color: var(--warn);
+  margin-bottom: 9px;
+}
+.g-note ul { margin: 0; padding-left: 18px; }
+.g-note li { font-size: 13.5px; line-height: 1.55; color: var(--muted); margin-top: 6px; }
+
+.g-honest {
+  margin-top: 14px;
+  padding: 13px 15px;
+  border-radius: var(--r-md);
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13.5px; line-height: 1.55; color: var(--muted);
+}
+.g-honest svg { flex: none; margin-top: 2px; }
+
+/* qoida kartalari */
+.g-rule {
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--stroke-soft);
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.g-rule.open { background: var(--card-2); border-color: hsla(var(--accent-h), 88%, 74%, 0.32); }
+.g-rule-head {
+  width: 100%;
+  display: flex; align-items: center; gap: 13px;
+  padding: 14px 15px;
+  cursor: pointer;
+  font-family: inherit;
+  background: none;
+  border: none;
+  color: var(--text);
+}
+.g-num {
+  width: 34px; height: 34px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  font-size: 15px; font-weight: 800;
+  color: var(--accent);
+  background: hsla(var(--accent-h), 60%, 50%, 0.14);
+  border: 1px solid hsla(var(--accent-h), 88%, 74%, 0.25);
+}
+.g-rule-t { display: block; font-size: 15px; font-weight: 700; }
+.g-rule-s { display: block; font-size: 12.5px; color: var(--faint); margin-top: 2px; }
+.g-chev { flex: none; display: grid; place-items: center; transition: transform 0.22s ease; }
+.g-rule.open .g-chev { transform: rotate(90deg); }
+.g-rule-body {
+  padding: 0 15px 15px 62px;
+  animation: g-open calc(0.28s / var(--speed)) ease;
+}
+@keyframes g-open { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.g-rule-body p { font-size: 14px; line-height: 1.62; color: var(--muted); }
+.g-app {
+  margin-top: 11px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: var(--accent);
+  padding: 9px 12px;
+  border-radius: 11px;
+  background: hsla(var(--accent-h), 60%, 50%, 0.10);
+}
+.g-app svg { flex: none; }
+
+/* amaliyot qadamlari */
+.g-step {
+  display: flex; gap: 13px;
+  padding: 14px 15px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--stroke-soft);
+}
+.g-step-ic {
+  position: relative;
+  width: 40px; height: 40px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 13px;
+  background: var(--card-2);
+}
+.g-step-ic span {
+  position: absolute; top: -5px; right: -5px;
+  width: 19px; height: 19px;
+  border-radius: 50%;
+  font-size: 11px; font-weight: 800;
+  display: grid; place-items: center;
+  color: #1a1330;
+  background: var(--accent);
+  border: 2px solid var(--bg-1);
+}
+.g-step-t { font-size: 15px; font-weight: 700; }
+
+/* nafas mashqi */
+.breath-box { padding: 20px 18px; display: flex; flex-direction: column; align-items: center; }
+.breath-stage {
+  position: relative;
+  width: 170px; height: 170px;
+  display: grid; place-items: center;
+}
+.breath-orb {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transform: scale(0.55);
+  background: radial-gradient(circle, hsla(var(--accent-h), 70%, 60%, 0.30), hsla(var(--accent-h), 70%, 50%, 0.05) 70%);
+  border: 1.5px solid hsla(var(--accent-h), 88%, 74%, 0.45);
+  box-shadow: 0 0 34px hsla(var(--accent-h), 85%, 65%, 0.25);
+  transition: transform 1s linear;
+}
+.breath-orb.run { transition-timing-function: cubic-bezier(0.4, 0, 0.5, 1); }
+.breath-mid { position: relative; z-index: 1; text-align: center; }
+.breath-sec {
+  font-size: 40px; font-weight: 800; line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.breath-lbl { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 4px; }
+.breath-dots { display: flex; gap: 7px; margin-top: 14px; }
+.breath-dots span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+.breath-dots span.on { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+/* checklist */
+.g-check {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 2px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.g-check + .g-check { border-top: 1px solid var(--stroke-soft); }
+.g-box {
+  width: 24px; height: 24px; flex: none;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.g-box.on { background: var(--accent); border-color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .breath-orb { transition: none; }
+  .g-rule-body { animation: none; }
+}
