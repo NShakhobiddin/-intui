@@ -73,6 +73,21 @@ export const JOURNAL_TAGS = ["Diqqatim jamlangan edi", "Ichki ovozni his qildim"
 // ---------- Storage ----------
 export const STORAGE_KEY = "intui_state_v2";
 const LEGACY_KEY = "intui_state_v1"; // demo ma'lumotli eski format
+
+/* ---------- Ko'rinish sozlamasi (faqat shu qurilmada) ----------
+   Fondagi rasm va animatsiyani o'chirish mumkin. Bu qurilmaga bog'liq
+   sozlama (kuchsizroq telefonda o'chirib qo'yish mumkin), shuning uchun
+   bulutga sinxronlanmaydi. */
+const BG_KEY = "intui_bg_v1";
+export function loadBgOn() {
+  try {
+    const v = localStorage.getItem(BG_KEY);
+    return v === null ? true : v === "1";
+  } catch (e) { return true; }
+}
+export function saveBgOn(on) {
+  try { localStorage.setItem(BG_KEY, on ? "1" : "0"); } catch (e) { /* ignore */ }
+}
 const DEFAULT_STATE = {
   nickname: null,
   onboarded: false,

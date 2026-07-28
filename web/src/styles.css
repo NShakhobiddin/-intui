@@ -1095,3 +1095,56 @@ textarea.field { padding: 16px 18px; resize: none; line-height: 1.5; }
   font-variant-numeric: tabular-nums;
 }
 @media (prefers-reduced-motion: reduce) { .pend-ball { transition: none; } }
+
+/* ===== Fon o'chirilgan holat — bir xil sokin fon ===== */
+.stage.bg-plain { background: #0a0818; }
+.app.bg-plain { background: #0e0b1e; }
+
+/* ===== Sozlamalar qatori + kalit (switch) ===== */
+.set-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 2px;
+  font-family: inherit;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.set-row + .set-row { border-top: 1px solid var(--stroke-soft); }
+.set-ic {
+  width: 38px; height: 38px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--card-2);
+}
+.set-t { display: block; font-size: 15px; font-weight: 700; }
+.set-s { display: block; font-size: 12.5px; color: var(--faint); margin-top: 2px; }
+
+.switch {
+  position: relative;
+  width: 50px; height: 29px; flex: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--stroke);
+  transition: background calc(0.2s / var(--speed)) ease, border-color calc(0.2s / var(--speed)) ease;
+}
+.switch > i {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 21px; height: 21px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform calc(0.22s / var(--speed)) cubic-bezier(0.3, 1.4, 0.5, 1), background calc(0.2s / var(--speed)) ease;
+}
+.switch.on {
+  background: hsla(var(--accent-h), 80%, 62%, 0.9);
+  border-color: hsla(var(--accent-h), 88%, 74%, 0.6);
+  box-shadow: 0 0 14px hsla(var(--accent-h), 85%, 70%, 0.35);
+}
+.switch.on > i { transform: translateX(21px); background: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .switch, .switch > i { transition: none; }
+}

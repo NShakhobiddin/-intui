@@ -290,7 +290,7 @@ function CloudSection({ cloud }) {
 }
 
 /* ===== Profil ===== */
-export function ProfileScreen({ state, stats, cloud, onRename, onReset }) {
+export function ProfileScreen({ state, stats, cloud, bgOn, onBgChange, onRename, onReset }) {
   const todayMin = D.minutesOn(state.sessions, D.todayStr());
   const [editing, setEditing] = React.useState(false);
   const [nick, setNick] = React.useState(state.nickname || "");
@@ -389,6 +389,22 @@ export function ProfileScreen({ state, stats, cloud, onRename, onReset }) {
             <p className="t-sub" style={{ fontSize: 14 }}>Jurnal hali bo'sh. Sessiya yakunida yozuv qoldirishingiz mumkin.</p>
           </div>
         )}
+
+        {/* Sozlamalar — ko'rinish */}
+        <SectionHead title="Sozlamalar" />
+        <div className="panel" style={{ padding: "4px 16px" }}>
+          <button className="set-row" onClick={() => onBgChange(!bgOn)} aria-pressed={!!bgOn}>
+            <span className="set-ic"><Ic name="sparkle" size={19} color="var(--accent)" /></span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="set-t">Fon rasmi va animatsiyasi</span>
+              <span className="set-s">{bgOn ? "Yoqilgan — kosmik fon jonli" : "O'chirilgan — bir xil sokin fon"}</span>
+            </span>
+            <span className={"switch" + (bgOn ? " on" : "")}><i /></span>
+          </button>
+        </div>
+        <p className="t-micro" style={{ marginTop: 9, lineHeight: 1.55 }}>
+          O'chirsangiz batareya kamroq sarflanadi va qurilma qizimaydi. Sozlama faqat shu qurilmada saqlanadi.
+        </p>
 
         {/* Bulut sinxronlash */}
         <CloudSection cloud={cloud} />

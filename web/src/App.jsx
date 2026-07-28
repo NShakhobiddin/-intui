@@ -21,6 +21,7 @@ export default function App() {
   const [state, setState] = React.useState(() => D.loadState());
   const [screen, setScreen] = React.useState(state.onboarded ? "home" : "welcome");
   const [game, setGame] = React.useState(null); // {mode, n, timer}
+  const [bgOn, setBgOn] = React.useState(D.loadBgOn); // fondagi rasm+animatsiya
   const [newBadges, setNewBadges] = React.useState([]);
   const [duoCode, setDuoCode] = React.useState(null); // jonli xona kodi (null = xona yaratish)
   const [duoToken, setDuoToken] = React.useState(null); // Telegram async chaqiruv/natija
@@ -214,9 +215,10 @@ export default function App() {
   const appStyle = { "--accent-h": 247, "--speed": 1 };
 
   return (
-    <div className="stage">
-      <div className="app" style={appStyle}>
-        {heavyPlay ? <CosmosStatic /> : <CosmosBG />}
+    <div className={"stage" + (bgOn ? "" : " bg-plain")}>
+      <div className={"app" + (bgOn ? "" : " bg-plain")} style={appStyle}>
+        {/* Fon o'chirilgan bo'lsa — rasm ham, animatsiya ham yo'q, bir xil fon */}
+        {bgOn ? (heavyPlay ? <CosmosStatic /> : <CosmosBG />) : null}
 
         {/* Telegramda ism botdan olinadi — nickname so'ralmaydi */}
         {screen === "welcome" ? <WelcomeScreen onStart={() => {
@@ -272,6 +274,7 @@ export default function App() {
         ) : null}
         {screen === "profile" ? (
           <ProfileScreen state={stateView} stats={stats} cloud={cloud}
+            bgOn={bgOn} onBgChange={(v) => { setBgOn(v); D.saveBgOn(v); }}
             onRename={(n) => save(Object.assign({}, state, { nickname: n }))}
             onReset={resetAll} />
         ) : null}

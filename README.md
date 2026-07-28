@@ -12,7 +12,8 @@ Claude Design (claude.ai/design) prototipi asosida React + Vite'da qurilgan mobi
 - **O'yin** — kayfiyat tanlash (yoki o'zingiz yozish) → 3 soniyalik fokus → bitta yopiq karta + tanlov tugmalari → darhol ochilish → avtomatik keyingi urinish. Tezkor rejimda tanlangan vaqt bo'yicha taymer (tugagach urinish o'tkazib yuboriladi), Birinchi sezgida tanlovni tasdiqlash/o'zgartirish. Istalgan payt "Yakunlash va statistikani ko'rish"
 - **Statistika** — Bugun/Hafta/Oy, aniqlik vs tasodif, vaqt/kayfiyat/rejim bo'yicha, birinchi tanlov tahlili, AI tahlil
 - **Reyting** — uch bo'lim: **Rekordlar** (shaxsiy eng yaxshi natijalar — qaysi kun, qaysi vaqt, qanday holatda), **Onlayn** (hozir ilovada turgan foydalanuvchilar), **Faollar** (eng ko'p soat mashq qilganlar reytingi). Onlayn/Faollar bo'limlari faqat Supabase sozlangan bo'lsa ko'rinadi.
-- **Profil** — streak, kunlik mashq daqiqalari, yutuqlar (badge), sezgi jurnali, progressni tozalash
+- **Profil** — streak, kunlik mashq daqiqalari, yutuqlar (badge), sezgi jurnali, **Sozlamalar** va progressni tozalash
+  - **Sozlamalar → Fon rasmi va animatsiyasi** — kosmik fonni butunlay o'chirish mumkin. O'chirilganda hech qanday fon rasmi va animatsiya chizilmaydi, o'rniga bir xil sokin fon qoladi (barcha ekranlarda, o'yin paytida ham). Batareya kam sarflanadi va qurilma qizimaydi. Sozlama faqat shu qurilmada saqlanadi (`intui_bg_v1`), bulutga sinxronlanmaydi — chunki har bir qurilmaning imkoniyati har xil.
 
 Barcha ma'lumotlar faqat foydalanuvchining o'z natijalari — ilova bo'sh holatda boshlanadi va har bir sessiya qurilmaning `localStorage` xotirasida avtomatik saqlanadi. Supabase sozlangan bo'lsa (quyiga qarang), Profilda email+parol bilan hisob ochib natijalarni bulutda saqlash va boshqa qurilmada davom ettirish mumkin.
 
