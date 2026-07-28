@@ -141,7 +141,8 @@ export function StatTile({ icon, tint, img, imgRound, label, big, sub }) {
 
 /* ===== Mode select (Mashq tab) ===== */
 export function ModeSelectScreen({ onStart, initial }) {
-  const [sel, setSel] = React.useState(initial || D.MODES[1].id);
+  // Standart tanlov — Oq-qora: metodika bo'yicha mashq shundan boshlanadi
+  const [sel, setSel] = React.useState(initial || D.MODES[0].id);
   const [counts, setCounts] = React.useState(() => {
     const o = {};
     D.MODES.forEach((m) => {o[m.id] = m.defaultOptions;});
