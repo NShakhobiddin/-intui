@@ -8,8 +8,8 @@ Claude Design (claude.ai/design) prototipi asosida React + Vite'da qurilgan mobi
 
 - **Onboarding** — Welcome ("Qanday ishlaydi?" sheet bilan) → Nickname (mehmon rejimi ham bor)
 - **Bosh sahifa** — kunlik challenge (100 urinish), Aniqlik/Streak kartalari, AI tavsiya, rejimlar
-- **Rejim tanlash** — 5 rejim: Oq-qora, Rangli, Shaklli, Tezkor, Birinchi sezgi; kartalar sonini sozlash
-- **O'yin** — kayfiyat tanlash (yoki o'zingiz yozish) → 3 soniyalik fokus → bitta yopiq karta + tanlov tugmalari → darhol ochilish → avtomatik keyingi urinish. Tezkor rejimda taymer, Birinchi sezgida tanlovni tasdiqlash/o'zgartirish. Istalgan payt "Yakunlash va statistikani ko'rish"
+- **Rejim tanlash** — 5 rejim: Oq-qora, Rangli, Shaklli, Tezkor, Birinchi sezgi; kartalar sonini sozlash. **Tezkor** rejimda javob vaqti ham tanlanadi: **1 / 2 / 3 soniya** (standarti 3 s)
+- **O'yin** — kayfiyat tanlash (yoki o'zingiz yozish) → 3 soniyalik fokus → bitta yopiq karta + tanlov tugmalari → darhol ochilish → avtomatik keyingi urinish. Tezkor rejimda tanlangan vaqt bo'yicha taymer (tugagach urinish o'tkazib yuboriladi), Birinchi sezgida tanlovni tasdiqlash/o'zgartirish. Istalgan payt "Yakunlash va statistikani ko'rish"
 - **Statistika** — Bugun/Hafta/Oy, aniqlik vs tasodif, vaqt/kayfiyat/rejim bo'yicha, birinchi tanlov tahlili, AI tahlil
 - **Reyting** — uch bo'lim: **Rekordlar** (shaxsiy eng yaxshi natijalar — qaysi kun, qaysi vaqt, qanday holatda), **Onlayn** (hozir ilovada turgan foydalanuvchilar), **Faollar** (eng ko'p soat mashq qilganlar reytingi). Onlayn/Faollar bo'limlari faqat Supabase sozlangan bo'lsa ko'rinadi.
 - **Profil** — streak, kunlik mashq daqiqalari, yutuqlar (badge), sezgi jurnali, progressni tozalash

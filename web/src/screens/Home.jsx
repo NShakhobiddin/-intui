@@ -147,6 +147,12 @@ export function ModeSelectScreen({ onStart, initial }) {
     D.MODES.forEach((m) => {o[m.id] = m.defaultOptions;});
     return o;
   });
+  // Tezkor rejim uchun tanlanadigan javob vaqti (soniya)
+  const [timers, setTimers] = React.useState(() => {
+    const o = {};
+    D.MODES.forEach((m) => {if (m.timer) o[m.id] = m.timer;});
+    return o;
+  });
   const mode = D.MODES.find((m) => m.id === sel);
   return (
     <div className="screen" data-screen-label="Rejimni tanlang">
@@ -184,6 +190,18 @@ export function ModeSelectScreen({ onStart, initial }) {
                     )}
                     </div> :
                   null}
+                  {on && m.timers ?
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 9, flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
+                      <span className="t-micro" style={{ marginRight: 2, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <Ic name="clock" size={13} color="var(--faint)" />Vaqt:
+                      </span>
+                      {m.timers.map((t) =>
+                    <button key={t} className={"tag" + (timers[m.id] === t ? " on" : "")}
+                    style={{ padding: "6px 13px", fontSize: 13 }}
+                    onClick={() => setTimers({ ...timers, [m.id]: t })}>{t} s</button>
+                    )}
+                    </div> :
+                  null}
                 </div>
                 {on ?
                 <div className="pop" style={{ width: 30, height: 30, borderRadius: "50%", flex: "none", display: "grid", placeItems: "center", background: "linear-gradient(180deg, hsl(var(--accent-h),85%,76%), hsl(var(--accent-h),70%,58%))", boxShadow: "0 0 14px hsla(var(--accent-h),85%,70%,0.5)" }}>
@@ -201,7 +219,7 @@ export function ModeSelectScreen({ onStart, initial }) {
           padding: "16px 0 8px",
           background: "linear-gradient(180deg, rgba(6,5,14,0) 0%, rgba(6,5,14,0.85) 35%, rgba(6,5,14,0.95) 100%)",
         }}>
-          <GlowButton burst={true} onClick={() => onStart(mode, counts[mode.id])}>Davom etish</GlowButton>
+          <GlowButton burst={true} onClick={() => onStart(mode, counts[mode.id], timers[mode.id])}>Davom etish</GlowButton>
         </div>
       </div>
     </div>);

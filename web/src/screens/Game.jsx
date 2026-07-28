@@ -13,8 +13,10 @@ function buildOptions(mode, n) {
   return pool.slice(0, n).map((c, i) => ({ ...c, key: i }));
 }
 
-export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplete }) {
+export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, onComplete }) {
   const TOTAL = 100;
+  // Tezkor rejimda javob vaqti tanlanadi (1/2/3 s); tanlanmasa — rejim standarti
+  const answerSec = mode.timer ? (timer || mode.timer) : null;
 
   const [phase, setPhase] = React.useState("mood"); // mood | focus | pick | second | reveal | summary
   const [mood, setMood] = React.useState(null);
@@ -53,7 +55,7 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
     setCount(ft);
     if (ft === 0) {
       setPhase("pick");
-      if (mode.timer) setPickTimer(mode.timer);
+      if (answerSec) setPickTimer(answerSec);
     } else {
       setPhase("focus");
     }
@@ -64,7 +66,7 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
     if (phase !== "focus") return;
     if (count <= 0) {
       setPhase("pick");
-      if (mode.timer) setPickTimer(mode.timer);
+      if (answerSec) setPickTimer(answerSec);
       return;
     }
     const t = setTimeout(() => setCount((c) => c - 1), 1000 / speed);
@@ -199,7 +201,7 @@ export function GameScreen({ mode, nOptions, state, speed = 1, onExit, onComplet
         </div>
       ) : null}
 
-      {phase === "pick" && mode.timer ? (
+      {phase === "pick" && answerSec ? (
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
           <span className="pill pill-hard" style={{ fontSize: 15 }}>
             <Ic name="clock" size={16} /> {pickTimer}s

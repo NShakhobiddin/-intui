@@ -20,7 +20,8 @@ export const MODES = [
   {
     id: "fast", name: "Tezkor", icon: "bolt", diff: "Qiyin", diffClass: "hard",
     desc: "Vaqtga qarshi tez sezish mashqi.",
-    kind: "guess", options: [2, 3, 4, 5], defaultOptions: 3, timer: 3,
+    kind: "guess", options: [2, 3, 4, 5], defaultOptions: 3,
+    timer: 3, timers: [1, 2, 3],
   },
   {
     id: "first", name: "Birinchi sezgi", icon: "star4", diff: "Qiyin", diffClass: "hard",

@@ -20,7 +20,7 @@ import { GuideScreen } from "./screens/Guide.jsx";
 export default function App() {
   const [state, setState] = React.useState(() => D.loadState());
   const [screen, setScreen] = React.useState(state.onboarded ? "home" : "welcome");
-  const [game, setGame] = React.useState(null); // {mode, n}
+  const [game, setGame] = React.useState(null); // {mode, n, timer}
   const [newBadges, setNewBadges] = React.useState([]);
   const [duoCode, setDuoCode] = React.useState(null); // jonli xona kodi (null = xona yaratish)
   const [duoToken, setDuoToken] = React.useState(null); // Telegram async chaqiruv/natija
@@ -179,8 +179,8 @@ export default function App() {
     setScreen("home");
   };
 
-  const startGame = (mode, n) => {
-    setGame({ mode, n: n || mode.defaultOptions });
+  const startGame = (mode, n, timer) => {
+    setGame({ mode, n: n || mode.defaultOptions, timer: timer || mode.timer });
     setScreen("game");
   };
 
@@ -277,7 +277,7 @@ export default function App() {
         ) : null}
 
         {screen === "game" && game ? (
-          <GameScreen mode={game.mode} nOptions={game.n} state={stateView}
+          <GameScreen mode={game.mode} nOptions={game.n} timer={game.timer} state={stateView}
             onExit={() => { setGame(null); setScreen("practice"); }}
             onComplete={completeGame} />
         ) : null}
