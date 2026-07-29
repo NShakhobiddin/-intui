@@ -14,6 +14,24 @@ Claude Design (claude.ai/design) prototipi asosida React + Vite'da qurilgan mobi
 - **Reyting** — uch bo'lim: **Rekordlar** (shaxsiy eng yaxshi natijalar — qaysi kun, qaysi vaqt, qanday holatda), **Onlayn** (hozir ilovada turgan foydalanuvchilar), **Faollar** (eng ko'p soat mashq qilganlar reytingi). Onlayn/Faollar bo'limlari faqat Supabase sozlangan bo'lsa ko'rinadi.
 - **Profil** — streak, kunlik mashq daqiqalari, yutuqlar (badge), sezgi jurnali, **Sozlamalar** va progressni tozalash
   - **Sozlamalar → Fon rasmi va animatsiyasi** — kosmik fonni butunlay o'chirish mumkin. O'chirilganda hech qanday fon rasmi va animatsiya chizilmaydi, o'rniga bir xil sokin fon qoladi (barcha ekranlarda, o'yin paytida ham). Batareya kam sarflanadi va qurilma qizimaydi. Sozlama faqat shu qurilmada saqlanadi (`intui_bg_v1`), bulutga sinxronlanmaydi — chunki har bir qurilmaning imkoniyati har xil.
+  - **Sozlamalar → Mashq davomidagi maslahatlar** — quyidagi maslahat tizimini yoqib/o'chirib qo'yish (`intui_tips_v1`).
+
+## Mashq davomidagi maslahatlar
+
+Mashq paytida ekran pastida ora-orada kitobdan olingan qisqa eslatma chiqadi (7 soniyadan keyin o'zi yo'qoladi, qo'lda ham yopish mumkin). Maslahatlar **tasodifiy emas** — o'yin borishiga qarab tanlanadi (`web/src/tips.js`):
+
+| Vaziyat | Maslahat mavzusi |
+|---|---|
+| 4+ ketma-ket xato | Xafa bo'lmang — tushkunlik ham, quvonch ham sezgini bir xil o'chiradi |
+| 4+ ketma-ket to'g'ri | Quvonishga shoshilmang — shu ondagi holatni eslab qoling |
+| Javob juda sekin (>4,2 s) | Pauza — mantiqqa ochilgan eshik |
+| Tezkor rejimda ulgurmaslik | Bu yomon emas — kelgan birinchi tuyg'uni bosing |
+| Birinchi tanlovni tez-tez o'zgartirish | Bir necha urinish birinchi javobga ishonib ko'ring |
+| Tez va aniq javoblar | Mana shu holat — uni eslab qoling |
+| 25+ urinishda tasodifdan ancha past/yuqori | Aql to'qiyapti / bu sizning ish holatingiz |
+| Har 12 urinishda | Aylanma umumiy eslatmalar (8 ta) |
+
+Yaqin kontekst (ketma-ketlik) uzoq muddatli statistikadan ustun turadi, ikki maslahat orasida kamida 7 urinish tanaffus bo'ladi va ko'rilgan maslahat takrorlanmaydi. Matn — kitob metodikasi asosidagi original, ko'chirma emas.
 
 Barcha ma'lumotlar faqat foydalanuvchining o'z natijalari — ilova bo'sh holatda boshlanadi va har bir sessiya qurilmaning `localStorage` xotirasida avtomatik saqlanadi. Supabase sozlangan bo'lsa (quyiga qarang), Profilda email+parol bilan hisob ochib natijalarni bulutda saqlash va boshqa qurilmada davom ettirish mumkin.
 

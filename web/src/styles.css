@@ -1148,3 +1148,54 @@ textarea.field { padding: 16px 18px; resize: none; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) {
   .switch, .switch > i { transition: none; }
 }
+
+/* ===== Mashq davomidagi maslahat (kitobdan) ===== */
+.tip-toast {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(16px + var(--inset-bottom));
+  z-index: 45;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 12px 13px 14px;
+  border-radius: var(--r-md);
+  background: rgba(16, 13, 34, 0.94);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  animation: tip-in calc(0.35s / var(--speed)) cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+@keyframes tip-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.tip-toast.good { border-color: rgba(74, 222, 128, 0.35); }
+.tip-toast.warn { border-color: rgba(251, 191, 36, 0.35); }
+.tip-ic {
+  width: 32px; height: 32px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.tip-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.tip-x {
+  flex: none;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.tip-x:active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .tip-toast { animation: none; } }

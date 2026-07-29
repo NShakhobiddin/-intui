@@ -290,7 +290,7 @@ function CloudSection({ cloud }) {
 }
 
 /* ===== Profil ===== */
-export function ProfileScreen({ state, stats, cloud, bgOn, onBgChange, onRename, onReset }) {
+export function ProfileScreen({ state, stats, cloud, bgOn, onBgChange, tipsOn, onTipsChange, onRename, onReset }) {
   const todayMin = D.minutesOn(state.sessions, D.todayStr());
   const [editing, setEditing] = React.useState(false);
   const [nick, setNick] = React.useState(state.nickname || "");
@@ -401,9 +401,18 @@ export function ProfileScreen({ state, stats, cloud, bgOn, onBgChange, onRename,
             </span>
             <span className={"switch" + (bgOn ? " on" : "")}><i /></span>
           </button>
+          <button className="set-row" onClick={() => onTipsChange(!tipsOn)} aria-pressed={!!tipsOn}>
+            <span className="set-ic"><Ic name="book" size={19} color="var(--accent)" /></span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="set-t">Mashq davomidagi maslahatlar</span>
+              <span className="set-s">{tipsOn ? "Yoqilgan — ora-orada kitobdan eslatma" : "O'chirilgan — hech narsa chiqmaydi"}</span>
+            </span>
+            <span className={"switch" + (tipsOn ? " on" : "")}><i /></span>
+          </button>
         </div>
         <p className="t-micro" style={{ marginTop: 9, lineHeight: 1.55 }}>
-          O'chirsangiz batareya kamroq sarflanadi va qurilma qizimaydi. Sozlama faqat shu qurilmada saqlanadi.
+          Fonni o'chirsangiz batareya kamroq sarflanadi. Maslahatlar mashq borishiga qarab chiqadi
+          (ketma-ket xato, juda sekin javob va h.k.). Sozlamalar faqat shu qurilmada saqlanadi.
         </p>
 
         {/* Bulut sinxronlash */}

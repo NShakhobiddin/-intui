@@ -22,6 +22,7 @@ export default function App() {
   const [screen, setScreen] = React.useState(state.onboarded ? "home" : "welcome");
   const [game, setGame] = React.useState(null); // {mode, n, timer}
   const [bgOn, setBgOn] = React.useState(D.loadBgOn); // fondagi rasm+animatsiya
+  const [tipsOn, setTipsOn] = React.useState(D.loadTipsOn); // mashqdagi maslahatlar
   const [newBadges, setNewBadges] = React.useState([]);
   const [duoCode, setDuoCode] = React.useState(null); // jonli xona kodi (null = xona yaratish)
   const [duoToken, setDuoToken] = React.useState(null); // Telegram async chaqiruv/natija
@@ -275,12 +276,13 @@ export default function App() {
         {screen === "profile" ? (
           <ProfileScreen state={stateView} stats={stats} cloud={cloud}
             bgOn={bgOn} onBgChange={(v) => { setBgOn(v); D.saveBgOn(v); }}
+            tipsOn={tipsOn} onTipsChange={(v) => { setTipsOn(v); D.saveTipsOn(v); }}
             onRename={(n) => save(Object.assign({}, state, { nickname: n }))}
             onReset={resetAll} />
         ) : null}
 
         {screen === "game" && game ? (
-          <GameScreen mode={game.mode} nOptions={game.n} timer={game.timer} state={stateView}
+          <GameScreen mode={game.mode} nOptions={game.n} timer={game.timer} state={stateView} tipsOn={tipsOn}
             onExit={() => { setGame(null); setScreen("practice"); }}
             onComplete={completeGame} />
         ) : null}

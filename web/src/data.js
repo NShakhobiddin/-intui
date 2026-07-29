@@ -88,6 +88,18 @@ export function loadBgOn() {
 export function saveBgOn(on) {
   try { localStorage.setItem(BG_KEY, on ? "1" : "0"); } catch (e) { /* ignore */ }
 }
+
+// Mashq davomida kitobdan maslahatlar chiqishi
+const TIPS_KEY = "intui_tips_v1";
+export function loadTipsOn() {
+  try {
+    const v = localStorage.getItem(TIPS_KEY);
+    return v === null ? true : v === "1";
+  } catch (e) { return true; }
+}
+export function saveTipsOn(on) {
+  try { localStorage.setItem(TIPS_KEY, on ? "1" : "0"); } catch (e) { /* ignore */ }
+}
 const DEFAULT_STATE = {
   nickname: null,
   onboarded: false,

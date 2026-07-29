@@ -3,6 +3,7 @@ import React from "react";
 import * as D from "../data.js";
 import { Ic, Logo, Ring, GlowButton, ImgIcon, BackBtn, ModeIcon, ShapeGlyph, MoodIcon } from "../ui.jsx";
 import { inTelegram, showBackButton, hideBackButton, haptic } from "../telegram.js";
+import { buildCtx, nextTip } from "../tips.js";
 
 function buildOptions(mode, n) {
   if (mode.id === "bw") {
@@ -13,7 +14,7 @@ function buildOptions(mode, n) {
   return pool.slice(0, n).map((c, i) => ({ ...c, key: i }));
 }
 
-export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, onComplete }) {
+export function GameScreen({ mode, nOptions, timer, state, speed = 1, tipsOn = true, onExit, onComplete }) {
   const TOTAL = 100;
   // Tezkor rejimda javob vaqti tanlanadi (1/2/3 s); tanlanmasa — rejim standarti
   const answerSec = mode.timer ? (timer || mode.timer) : null;
@@ -32,6 +33,20 @@ export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, on
   const [pickTimer, setPickTimer] = React.useState(null);
   const [elapsed, setElapsed] = React.useState(0);
   const startRef = React.useRef(Date.now());
+  // Maslahatlar: javob vaqtlari + hozir ko'rinayotgan maslahat
+  const [tip, setTip] = React.useState(null);
+  const times = React.useRef([]);       // har urinishga sarflangan ms
+  const pickAt = React.useRef(0);       // tanlov fazasi boshlangan payt
+  const tipState = React.useRef({ lastAt: 0, shownIds: [] });
+  const tipTimer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(tipTimer.current), []);
+  const showTip = (t) => {
+    setTip(t);
+    tipState.current.lastAt = t.at;
+    tipState.current.shownIds = [...tipState.current.shownIds, t.id];
+    clearTimeout(tipTimer.current);
+    tipTimer.current = setTimeout(() => setTip(null), 7000);
+  };
 
   // session clock
   React.useEffect(() => {
@@ -55,6 +70,7 @@ export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, on
     setCount(ft);
     if (ft === 0) {
       setPhase("pick");
+      pickAt.current = Date.now();
       if (answerSec) setPickTimer(answerSec);
     } else {
       setPhase("focus");
@@ -66,6 +82,7 @@ export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, on
     if (phase !== "focus") return;
     if (count <= 0) {
       setPhase("pick");
+      pickAt.current = Date.now();
       if (answerSec) setPickTimer(answerSec);
       return;
     }
@@ -97,8 +114,15 @@ export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, on
     setPick(i);
     const correct = i !== null && i === secret;
     haptic(correct ? "success" : "error");
-    setResults((r) => [...r, { correct, changed, missed: i === null }]);
+    times.current = [...times.current, pickAt.current ? Date.now() - pickAt.current : 0];
+    const next = [...results, { correct, changed, missed: i === null }];
+    setResults(next);
     setPhase("reveal");
+    // Kitobdan maslahat — o'yin borishiga qarab, ora-orada
+    if (tipsOn) {
+      const t = nextTip(buildCtx(next, times.current, Math.round(100 / nOptions)), tipState.current);
+      if (t) showTip({ ...t, at: next.length });
+    }
   }
 
   function next() {
@@ -186,7 +210,8 @@ export function GameScreen({ mode, nOptions, timer, state, speed = 1, onExit, on
 
   return (
     <GameShell mode={mode} attempt={attempt + 1} total={TOTAL} onExit={handleExit} onFinish={phase !== "summary" && results.length ? handleExit : null}
-      statsBar={phase !== "summary" ? liveStats : null}>
+      statsBar={phase !== "summary" ? liveStats : null}
+      tip={phase !== "summary" ? tip : null} onCloseTip={() => { clearTimeout(tipTimer.current); setTip(null); }}>
       {phase === "focus" ? (
         <div style={{ textAlign: "center", marginTop: 6 }}>
           <p style={{ fontSize: 16.5, color: "var(--muted)" }}>
@@ -310,9 +335,21 @@ function LiveStats({ acc, correct, done, chance, streak, time }) {
   );
 }
 
-function GameShell({ mode, attempt, total, onExit, onFinish, statsBar, children }) {
+function GameShell({ mode, attempt, total, onExit, onFinish, statsBar, tip, onCloseTip, children }) {
   return (
     <div className="screen" data-screen-label={"O'yin — " + mode.name}>
+      {tip ? (
+        <div className={"tip-toast " + (tip.kind || "note")} role="status">
+          <span className="tip-ic">
+            <Ic name={tip.kind === "good" ? "sparkle" : tip.kind === "warn" ? "question" : "book"} size={17}
+              color={tip.kind === "good" ? "var(--good)" : tip.kind === "warn" ? "var(--warn)" : "var(--accent)"} />
+          </span>
+          <span className="tip-txt">{tip.text}</span>
+          <button className="tip-x" onClick={onCloseTip} aria-label="Yopish">
+            <Ic name="close" size={15} color="var(--faint)" />
+          </button>
+        </div>
+      ) : null}
       <div className="screen-pad-nonav" style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <BackBtn onClick={onExit} />
